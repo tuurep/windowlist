@@ -147,17 +147,22 @@ generate_window_list() {
 	on_click="$0"
 
 	# Format each window name one by one
-	# Space and . are both used as IFS,
-	# because classname and class are separated by '.'
-	while IFS="[ .\.]" read -r wid ws cname cls host title; do
+	while IFS="[ .]" read -r wid ws _; do
 		# Don't show the window if on another workspace (-1 = sticky)
 		if [ "$ws" != "$active_workspace" ] && [ "$ws" != "-1" ]; then
 			continue
 		fi
 
+                wmclass_prop=$(xprop -id $wid WM_CLASS)
+                title_prop=$(xprop -id $wid WM_NAME)
+
+                class=$(echo $wmclass_prop | cut -d \" -f4)
+                classname=$(echo $wmclass_prop | cut -d \" -f2)
+                title=$(echo $title_prop | cut -d \" -f2)
+
 		# Don't show the window if its class is forbidden
 		case "$forbidden_classes" in
-			*$cls*) continue ;;
+			*$class*) continue ;;
 		esac
 
 		# If max number of windows reached, just increment
@@ -169,8 +174,8 @@ generate_window_list() {
 		
 		# Show the user-selected window property
 		case "$show" in
-			"window_class") w_name="$cls" ;;
-			"window_classname") w_name="$cname" ;;
+			"window_class") w_name="$class" ;;
+			"window_classname") w_name="$classname" ;;
 			"window_title") w_name="$title" ;;
 		esac
 		
@@ -219,7 +224,7 @@ generate_window_list() {
 
 		window_count=$(( window_count + 1 ))
 	done <<-EOF
-	$(wmctrl -lx)
+	$(wmctrl -l)
 	EOF
 
 	# After printing all the windows,
