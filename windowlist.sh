@@ -11,7 +11,6 @@ inactive_bg=
 inactive_underline=
 
 separator="·"
-show="window_class" # options: window_title, window_class, window_classname
 forbidden_classes="Polybar Conky Gmrun"
 empty_desktop_message=
 
@@ -140,6 +139,10 @@ get_active_workspace() {
 		done
 }
 
+get_wm_class() {
+        xprop -id $1 WM_CLASS | cut -d \" -f4
+}
+
 generate_window_list() {
 	active_workspace=$(get_active_workspace)
 	active_wid=$(get_active_wid)
@@ -153,16 +156,11 @@ generate_window_list() {
 			continue
 		fi
 
-                wmclass_prop=$(xprop -id $wid WM_CLASS)
-                title_prop=$(xprop -id $wid WM_NAME)
-
-                class=$(echo $wmclass_prop | cut -d \" -f4)
-                classname=$(echo $wmclass_prop | cut -d \" -f2)
-                title=$(echo $title_prop | cut -d \" -f2)
+                w_name=$(get_wm_class $wid)
 
 		# Don't show the window if its class is forbidden
 		case "$forbidden_classes" in
-			*$class*) continue ;;
+			*$w_name*) continue ;;
 		esac
 
 		# If max number of windows reached, just increment
@@ -171,13 +169,6 @@ generate_window_list() {
 			window_count=$(( window_count + 1 ))
 			continue
 		fi
-		
-		# Show the user-selected window property
-		case "$show" in
-			"window_class") w_name="$class" ;;
-			"window_classname") w_name="$classname" ;;
-			"window_title") w_name="$title" ;;
-		esac
 		
 		# Use user-selected character case
 		case "$char_case" in
