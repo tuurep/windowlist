@@ -140,7 +140,7 @@ get_active_workspace() {
 }
 
 get_wm_class() {
-        xprop -id $1 WM_CLASS | cut -d \" -s -f4
+        xprop -id "$1" WM_CLASS | cut -d \" -s -f4
 }
 
 generate_window_list() {
@@ -156,10 +156,10 @@ generate_window_list() {
 			continue
 		fi
 
-                w_name=$(get_wm_class $wid)
+                w_name=$(get_wm_class "$wid")
 
                 # If window doesn't have WM_CLASS properties
-                if [ -z $w_name ]; then
+                if [ -z "$w_name" ]; then
                         continue
                 fi
 
