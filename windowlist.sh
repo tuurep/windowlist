@@ -31,7 +31,7 @@ main() {
 		# the active window changes or
 		# a window is opened or closed
 		xprop -root -spy _NET_CLIENT_LIST _NET_ACTIVE_WINDOW |
-			while IFS= read -r _; do
+			while read -r _; do
 				generate_window_list
 			done
 
@@ -63,7 +63,7 @@ slop_resize() {
 }
 
 increment_size() {
-	while IFS="[ .]" read -r wid ws wx wy ww wh _; do
+	while read -r wid ws wx wy ww wh _; do
 		test "$wid" != "$1" && continue
 		x=$(( wx - wm_border_width * 2 - resize_increment / 2 ))
 		y=$(( wy - wm_border_width * 2 - resize_increment / 2 ))
@@ -77,7 +77,7 @@ increment_size() {
 }
 
 decrement_size() {
-	while IFS="[ .]" read -r wid ws wx wy ww wh _; do
+	while read -r wid ws wx wy ww wh _; do
 		test "$wid" != "$1" && continue
 		x=$(( wx - wm_border_width * 2 + resize_increment / 2 ))
 		y=$(( wy - wm_border_width * 2 + resize_increment / 2 ))
@@ -134,7 +134,7 @@ get_active_wid() {
 
 get_active_workspace() {
 	wmctrl -d |
-		while IFS="[ .]" read -r number active_status _; do
+		while read -r number active_status _; do
 			test "$active_status" = "*" && echo "$number" && break
 		done
 }
@@ -150,7 +150,7 @@ generate_window_list() {
 	on_click="$0"
 
 	# Format each window name one by one
-	while IFS="[ .]" read -r wid ws _; do
+	while read -r wid ws _; do
 		# Don't show the window if on another workspace (-1 = sticky)
 		if [ "$ws" != "$active_workspace" ] && [ "$ws" != "-1" ]; then
 			continue
