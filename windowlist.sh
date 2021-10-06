@@ -140,7 +140,7 @@ get_active_workspace() {
 }
 
 get_wm_class() {
-        xprop -id $1 WM_CLASS | cut -d \" -f4
+        xprop -id $1 WM_CLASS | cut -d \" -s -f4
 }
 
 generate_window_list() {
@@ -157,6 +157,11 @@ generate_window_list() {
 		fi
 
                 w_name=$(get_wm_class $wid)
+
+                # If window doesn't have WM_CLASS properties
+                if [ -z $w_name ]; then
+                        continue
+                fi
 
 		# Don't show the window if its class is forbidden
 		case "$forbidden_classes" in
