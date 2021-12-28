@@ -14,7 +14,7 @@ separator="·"
 forbidden_classes="Polybar Conky Gmrun"
 empty_desktop_message=
 
-char_limit=20
+char_limit=30
 max_windows=15
 char_case="lower" # normal, upper, lower
 add_spaces="true"
