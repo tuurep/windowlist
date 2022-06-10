@@ -156,17 +156,22 @@ static int list_windows (Display *disp) {
 }
 
 static gchar *get_window_class (Display *disp, Window win) {
-    gchar *class_utf8;
     gchar *wm_class;
+    gchar *class_utf8;
     unsigned long size;
 
     wm_class = get_property(disp, win, XA_STRING, "WM_CLASS", &size);
     if (wm_class) {
-        gchar *p_0 = strchr(wm_class, '\0');
-        if (wm_class + size - 1 > p_0) {
-            *(p_0) = '.';
-        }
-        class_utf8 = g_locale_to_utf8(wm_class, -1, NULL, NULL, NULL);
+        /* 
+           WM_CLASS contains two consecutive null-terminated strings:
+           <Instance>\0<Class>\0
+           We want the second one, so point after the first null-terminator.
+
+           More explanation on this pretty unintuitive window property:
+           https://unix.stackexchange.com/questions/494169/wm-class-vs-wm-instance
+        */
+        gchar *class = strchr(wm_class, '\0') + 1;
+        class_utf8 = g_locale_to_utf8(class, -1, NULL, NULL, NULL);
     }
     else {
         class_utf8 = NULL;

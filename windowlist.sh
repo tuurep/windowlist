@@ -141,10 +141,6 @@ get_active_workspace() {
 		done
 }
 
-get_wm_class() {
-        xprop -id "$1" WM_CLASS | cut -d \" -s -f4
-}
-
 generate_window_list() {
 	active_workspace=$(get_active_workspace)
 	active_wid=$(get_active_wid)
@@ -152,22 +148,20 @@ generate_window_list() {
 	on_click="$0"
 
 	# Format each window name one by one
-	while read -r wid ws _; do
+	while read -r wid ws class; do
 		# Don't show the window if on another workspace (-1 = sticky)
 		if [ "$ws" != "$active_workspace" ] && [ "$ws" != "-1" ]; then
 			continue
 		fi
 
-                w_name=$(get_wm_class "$wid")
-
                 # If window doesn't have WM_CLASS properties
-                if [ -z "$w_name" ]; then
+                if [ -z "$class" ]; then
                         continue
                 fi
 
 		# Don't show the window if its class is forbidden
 		case "$forbidden_classes" in
-			*$w_name*) continue ;;
+			*$class*) continue ;;
 		esac
 
 		# If max number of windows reached, just increment
@@ -179,29 +173,29 @@ generate_window_list() {
 		
 		# Use user-selected character case
 		case "$char_case" in
-			"lower") w_name=$(
-				echo "$w_name" | tr '[:upper:]' '[:lower:]'
+			"lower") class=$(
+				echo "$class" | tr '[:upper:]' '[:lower:]'
 				) ;;
-			"upper") w_name=$(
-				echo "$w_name" | tr '[:lower:]' '[:upper:]'
+			"upper") class=$(
+				echo "$class" | tr '[:lower:]' '[:upper:]'
 				) ;;
 		esac
 
 		# Truncate displayed name to user-selected limit
-		if [ "${#w_name}" -gt "$char_limit" ]; then
-			w_name="$(echo "$w_name" | cut -c1-$((char_limit-1)))…"
+		if [ "${#class}" -gt "$char_limit" ]; then
+			class="$(echo "$class" | cut -c1-$((char_limit-1)))…"
 		fi
 
 		# Apply add-spaces setting
 		if [ "$add_spaces" = "true" ]; then
-			w_name=" $w_name "
+			class=" $class "
 		fi
 
 		# Add left and right formatting to displayed name
 		if [ "$wid" = "$active_wid" ]; then
-			w_name="${active_left}${w_name}${active_right}"
+			class="${active_left}${class}${active_right}"
 		else
-			w_name="${inactive_left}${w_name}${inactive_right}"
+			class="${inactive_left}${class}${inactive_right}"
 		fi
 
 		# Add separator unless the window is first in list
@@ -217,7 +211,7 @@ generate_window_list() {
 		# printf "%s" "%{A5:$on_click decrement_size $wid:}"
 
 		# Print the final window name
-		printf "%s" "$w_name"
+		printf "%s" "$class"
 		printf "%s" "%{A}%{A}"
 
 		window_count=$(( window_count + 1 ))
