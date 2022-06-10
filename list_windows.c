@@ -31,6 +31,7 @@ static gchar *get_window_class (Display *disp, Window win);
 static gchar *get_property (Display *disp, Window win, 
         Atom xa_prop_type, gchar *prop_name, unsigned long *size);
 static void init_charset(void);
+static int list_current_desktop (Display *disp);
 
 static struct {
     int force_utf8;
@@ -82,6 +83,24 @@ static void init_charset (void) {
     if (options.force_utf8) {
         envir_utf8 = TRUE;
     }
+}
+
+static int list_current_desktop (Display *disp) {
+    unsigned long *cur_desktop = NULL;
+    Window root = DefaultRootWindow(disp);
+    if (! (cur_desktop = (unsigned long *)get_property(disp, root,
+            XA_CARDINAL, "_NET_CURRENT_DESKTOP", NULL))) {
+        if (! (cur_desktop = (unsigned long *)get_property(disp, root,
+                XA_CARDINAL, "_WIN_WORKSPACE", NULL))) {
+            fputs("Cannot get current desktop properties. "
+                  "(_NET_CURRENT_DESKTOP or _WIN_WORKSPACE property)"
+                  "\n", stderr);
+            g_free(cur_desktop);
+            return EXIT_FAILURE;
+        }
+    }
+    printf("%-2d\n", *((int *) cur_desktop));
+    return EXIT_SUCCESS;
 }
 
 static Window *get_client_list (Display *disp, unsigned long *size) {
