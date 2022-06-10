@@ -2,6 +2,8 @@
 
 # SETTINGS {{{ ---
 
+base_dir="$HOME/.config/polybar/scripts/windowlist"
+
 active_text_color="#dfdfdf"
 active_bg=
 active_underline=
@@ -220,7 +222,7 @@ generate_window_list() {
 
 		window_count=$(( window_count + 1 ))
 	done <<-EOF
-	$(wmctrl -l)
+        $("$base_dir"/list_windows)
 	EOF
 
 	# After printing all the windows,
