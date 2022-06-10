@@ -27,8 +27,6 @@
 /* declarations of static functions */
 static Window *get_client_list (Display *disp, unsigned long *size);
 static int list_windows (Display *disp);
-static gchar *get_output_str (gchar *str, gboolean is_utf8);
-static gchar *get_window_title (Display *disp, Window win);
 static gchar *get_window_class (Display *disp, Window win);
 static gchar *get_property (Display *disp, Window win, 
         Atom xa_prop_type, gchar *prop_name, unsigned long *size);
@@ -36,10 +34,6 @@ static void init_charset(void);
 
 static struct {
     int force_utf8;
-    int show_class;
-    int show_pid;
-    int show_geometry;
-    int stacking_order;
 } options;
 
 static gboolean envir_utf8;
@@ -90,55 +84,16 @@ static void init_charset (void) {
     }
 }
 
-static gchar *get_output_str (gchar *str, gboolean is_utf8) {
-    gchar *out;
-
-    if (str == NULL) {
-        return NULL;
-    }
-
-    if (envir_utf8) {
-        if (is_utf8) {
-            out = g_strdup(str);
-        }
-        else {
-            if (! (out = g_locale_to_utf8(str, -1, NULL, NULL, NULL))) {
-                out = g_strdup(str);
-            }
-        }
-    }
-    else {
-        if (is_utf8) {
-            if (! (out = g_locale_from_utf8(str, -1, NULL, NULL, NULL))) {
-                out = g_strdup(str);
-            }
-        }
-        else {
-            out = g_strdup(str);
-        }
-    }
-
-    return out;
-}
-
 static Window *get_client_list (Display *disp, unsigned long *size) {
     Window *client_list = NULL;
     char * msg = NULL;
 
-    if (options.stacking_order)
-    {
-        msg = "_NET_CLIENT_LIST_STACKING";
-        client_list = (Window *) get_property(disp, DefaultRootWindow(disp), 
-                XA_WINDOW, "_NET_CLIENT_LIST_STACKING", size);
-    }
-    else {
-        msg = "_NET_CLIENT_LIST or _WIN_CLIENT_LIST";
+    msg = "_NET_CLIENT_LIST or _WIN_CLIENT_LIST";
+    client_list = (Window *)get_property(disp, DefaultRootWindow(disp), 
+            XA_WINDOW, "_NET_CLIENT_LIST", size);
+    if (!client_list)
         client_list = (Window *)get_property(disp, DefaultRootWindow(disp), 
-                XA_WINDOW, "_NET_CLIENT_LIST", size);
-        if (!client_list)
-            client_list = (Window *)get_property(disp, DefaultRootWindow(disp), 
-                    XA_CARDINAL, "_WIN_CLIENT_LIST", size);
-    }
+                XA_CARDINAL, "_WIN_CLIENT_LIST", size);
 
     if (!client_list)
         fprintf(stderr, "Cannot get client list properties.\n(%s)\n", msg);
@@ -150,33 +105,15 @@ static int list_windows (Display *disp) {
     Window *client_list;
     unsigned long client_list_size;
     int i;
-    int max_client_machine_len = 0;
 
     if ((client_list = get_client_list(disp, &client_list_size)) == NULL) {
         return EXIT_FAILURE; 
     }
 
-    /* find the longest client_machine name */
-    for (i = 0; i < client_list_size / sizeof(Window); i++) {
-        gchar *client_machine;
-        if ((client_machine = get_property(disp, client_list[i],
-                        XA_STRING, "WM_CLIENT_MACHINE", NULL))) {
-            max_client_machine_len = strlen(client_machine);    
-        }
-        g_free(client_machine);
-    }
-
     /* print the list */
     for (i = 0; i < client_list_size / sizeof(Window); i++) {
-        gchar *title_utf8 = get_window_title(disp, client_list[i]); /* UTF8 */
-        gchar *title_out = get_output_str(title_utf8, TRUE);
-        gchar *client_machine;
         gchar *class_out = get_window_class(disp, client_list[i]); /* UTF8 */
-        unsigned long *pid;
         unsigned long *desktop;
-        int x, y, junkx, junky;
-        unsigned int wwidth, wheight, bw, depth;
-        Window junkroot;
 
         /* desktop ID */
         if ((desktop = (unsigned long *)get_property(disp, client_list[i],
@@ -185,45 +122,14 @@ static int list_windows (Display *disp) {
                     XA_CARDINAL, "_WIN_WORKSPACE", NULL);
         }
 
-        /* client machine */
-        client_machine = get_property(disp, client_list[i],
-                XA_STRING, "WM_CLIENT_MACHINE", NULL);
-
-        /* pid */
-        pid = (unsigned long *)get_property(disp, client_list[i],
-                XA_CARDINAL, "_NET_WM_PID", NULL);
-
-        /* geometry */
-        XGetGeometry (disp, client_list[i], &junkroot, &junkx, &junky,
-                &wwidth, &wheight, &bw, &depth);
-        XTranslateCoordinates (disp, client_list[i], junkroot, junkx, junky,
-                &x, &y, &junkroot);
-
         /* special desktop ID -1 means "all desktops", so we 
            have to convert the desktop value to signed long */
         printf("0x%.8lx %2ld", client_list[i], 
                 desktop ? (signed long)*desktop : 0);
-        if (options.show_pid) {
-            printf(" %-6lu", pid ? *pid : 0);
-        }
-        if (options.show_geometry) {
-            printf(" %-4d %-4d %-4d %-4d", x, y, wwidth, wheight);
-        }
-        if (options.show_class) {
-            printf(" %-20s ", class_out ? class_out : "N/A");
-        }
-
-        printf(" %*s %s\n",
-                max_client_machine_len,
-                client_machine ? client_machine : "N/A",
-                title_out ? title_out : "N/A"
-              );
-        g_free(title_utf8);
-        g_free(title_out);
+        printf(" %-20s ", class_out ? class_out : "N/A");
+        printf("\n");
         g_free(desktop);
-        g_free(client_machine);
         g_free(class_out);
-        g_free(pid);
     }
     g_free(client_list);
 
@@ -250,33 +156,6 @@ static gchar *get_window_class (Display *disp, Window win) {
     g_free(wm_class);
 
     return class_utf8;
-}
-
-static gchar *get_window_title (Display *disp, Window win) {
-    gchar *title_utf8;
-    gchar *wm_name;
-    gchar *net_wm_name;
-
-    wm_name = get_property(disp, win, XA_STRING, "WM_NAME", NULL);
-    net_wm_name = get_property(disp, win, 
-            XInternAtom(disp, "UTF8_STRING", False), "_NET_WM_NAME", NULL);
-
-    if (net_wm_name) {
-        title_utf8 = g_strdup(net_wm_name);
-    }
-    else {
-        if (wm_name) {
-            title_utf8 = g_locale_to_utf8(wm_name, -1, NULL, NULL, NULL);
-        }
-        else {
-            title_utf8 = NULL;
-        }
-    }
-
-    g_free(wm_name);
-    g_free(net_wm_name);
-
-    return title_utf8;
 }
 
 static gchar *get_property (Display *disp, Window win,
