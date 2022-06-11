@@ -1,7 +1,6 @@
-Initial commit
+Fork of my favorite Polybar script `polywins` ([link](https://github.com/tam-carre/polywins))
 
 TODO:
-* Add modified `wmctrl` window listing functions
-* Rewrite most of the script in C
+* Rewrite some bash stuff (if not most?) in C
 * Write README properly
 * Go full ham
