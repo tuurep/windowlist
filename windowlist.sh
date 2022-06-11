@@ -13,7 +13,7 @@ inactive_bg=
 inactive_underline=
 
 separator="·"
-forbidden_classes="Polybar Conky Gmrun"
+forbidden_classes=
 empty_desktop_message=
 
 char_limit=30
@@ -134,30 +134,13 @@ get_active_wid() {
 	echo "$active_wid"
 }
 
-get_active_workspace() {
-	wmctrl -d |
-		while read -r number active_status _; do
-			test "$active_status" = "*" && echo "$number" && break
-		done
-}
-
 generate_window_list() {
-	active_workspace=$(get_active_workspace)
 	active_wid=$(get_active_wid)
 	window_count=0
 	on_click="$0"
 
 	# Format each window name one by one
-	while read -r wid ws class; do
-		# Don't show the window if on another workspace (-1 = sticky)
-		if [ "$ws" != "$active_workspace" ] && [ "$ws" != "-1" ]; then
-			continue
-		fi
-
-                # If window doesn't have WM_CLASS properties
-                if [ -z "$class" ]; then
-                        continue
-                fi
+	while read -r wid class; do
 
 		# Don't show the window if its class is forbidden
 		case "$forbidden_classes" in

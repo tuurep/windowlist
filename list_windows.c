@@ -31,7 +31,7 @@ static gchar *get_window_class (Display *disp, Window win);
 static gchar *get_property (Display *disp, Window win, 
         Atom xa_prop_type, gchar *prop_name, unsigned long *size);
 static void init_charset(void);
-static int list_current_desktop (Display *disp);
+static unsigned long *current_desktop (Display *disp);
 
 static struct {
     int force_utf8;
@@ -85,7 +85,7 @@ static void init_charset (void) {
     }
 }
 
-static int list_current_desktop (Display *disp) {
+static unsigned long *current_desktop (Display *disp) {
     unsigned long *cur_desktop = NULL;
     Window root = DefaultRootWindow(disp);
     if (! (cur_desktop = (unsigned long *)get_property(disp, root,
@@ -96,11 +96,10 @@ static int list_current_desktop (Display *disp) {
                   "(_NET_CURRENT_DESKTOP or _WIN_WORKSPACE property)"
                   "\n", stderr);
             g_free(cur_desktop);
-            return EXIT_FAILURE;
+            return NULL;
         }
     }
-    printf("%-2d\n", *((int *) cur_desktop));
-    return EXIT_SUCCESS;
+    return cur_desktop;
 }
 
 static Window *get_client_list (Display *disp, unsigned long *size) {
@@ -129,9 +128,10 @@ static int list_windows (Display *disp) {
         return EXIT_FAILURE; 
     }
 
+    unsigned long *cur_desktop = current_desktop(disp);
+
     /* print the list */
     for (i = 0; i < client_list_size / sizeof(Window); i++) {
-        gchar *class_out = get_window_class(disp, client_list[i]); /* UTF8 */
         unsigned long *desktop;
 
         /* desktop ID */
@@ -141,14 +141,23 @@ static int list_windows (Display *disp) {
                     XA_CARDINAL, "_WIN_WORKSPACE", NULL);
         }
 
-        /* special desktop ID -1 means "all desktops", so we 
-           have to convert the desktop value to signed long */
-        printf("0x%.8lx %2ld", client_list[i], 
-                desktop ? (signed long)*desktop : 0);
-        printf(" %-20s ", class_out ? class_out : "N/A");
+        /* Only list windows from the current desktop
+           This also excludes windows in the 'omnipresent' desktop ID -1
+           like Polybar and Rofi for example. */
+        if (*desktop != *cur_desktop) {
+            continue;
+        }
+
+        gchar *class = get_window_class(disp, client_list[i]); /* UTF8 */
+
+        /* window ID */
+        printf("0x%.8lx", client_list[i]);
+
+        printf(" %-20s ", class ? class : "N/A");
         printf("\n");
+
         g_free(desktop);
-        g_free(class_out);
+        g_free(class);
     }
     g_free(client_list);
 
