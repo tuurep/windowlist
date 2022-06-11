@@ -13,6 +13,8 @@ inactive_bg=
 inactive_underline=
 
 separator="·"
+separator_color="$inactive_text_color"
+
 forbidden_classes=
 empty_desktop_message=
 
@@ -102,7 +104,7 @@ active_left="%{F$active_text_color}"
 active_right="%{F-}"
 inactive_left="%{F$inactive_text_color}"
 inactive_right="%{F-}"
-separator="%{F$inactive_text_color}$separator%{F-}"
+separator="%{F$separator_color}$separator%{F-}"
 
 if [ -n "$active_underline" ]; then
 	active_left="${active_left}%{+u}%{u$active_underline}"
