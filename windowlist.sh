@@ -25,6 +25,8 @@ add_spaces="true"
 resize_increment=16
 wm_border_width=1 # setting this might be required for accurate resize position
 
+sort="position"
+
 # --- }}}
 
 
@@ -44,7 +46,6 @@ main() {
 		"$@"
 	fi
 }
-
 
 
 # ON-CLICK FUNCTIONS {{{ ---
@@ -97,7 +98,6 @@ decrement_size() {
 # --- }}}
 
 
-
 # WINDOW LIST SETUP {{{ ---
 
 active_left="%{F$active_text_color}"
@@ -142,7 +142,7 @@ generate_window_list() {
 	on_click="$0"
 
 	# Format each window name one by one
-	while read -r wid class; do
+	while read -r wid x y class; do
 
 		# Don't show the window if its class is forbidden
 		case "$forbidden_classes" in
@@ -189,11 +189,10 @@ generate_window_list() {
 		fi
 
 		# Add on-click action Polybar formatting
+                # A1: Left click  -  A2: Middle click  -  A3: Right click
+                # A4: Scroll up   -  A5: Scroll down
 		printf "%s" "%{A1:$on_click raise_or_minimize $wid:}"
-		# printf "%s" "%{A2:$on_click slop_resize $wid:}"
 		printf "%s" "%{A3:$on_click close $wid:}"
-		# printf "%s" "%{A4:$on_click increment_size $wid:}"
-		# printf "%s" "%{A5:$on_click decrement_size $wid:}"
 
 		# Print the final window name
 		printf "%s" "$class"
@@ -201,7 +200,19 @@ generate_window_list() {
 
 		window_count=$(( window_count + 1 ))
 	done <<-EOF
-        $("$base_dir"/list_windows)
+        $(
+                case "$sort" in
+                        "position")
+                                "$base_dir"/list_windows | sort -nk 2 -nk 3
+                                ;;
+                        "alphabetic")
+                                "$base_dir"/list_windows | sort -k 4
+                                ;;
+                        *)
+                                "$base_dir"/list_windows
+                                ;;
+                esac
+        )
 	EOF
 
 	# After printing all the windows,

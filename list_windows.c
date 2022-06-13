@@ -119,6 +119,18 @@ static Window *get_client_list (Display *disp, unsigned long *size) {
     return client_list;
 }
 
+static void calculate_window_middle_x_y(Display *disp, Window win, int *x, int *y) {
+    Window junkroot;
+    int junkx, junky;
+    unsigned int w, h, border_width, depth;
+
+    XGetGeometry(disp, win, &junkroot, &junkx, &junky, &w, &h, &border_width, &depth);
+    XTranslateCoordinates(disp, win, junkroot, junkx, junky, x, y, &junkroot);
+
+    *x = *x + w/2;
+    *y = *y + h/2;
+}
+
 static int list_windows (Display *disp) {
     Window *client_list;
     unsigned long client_list_size;
@@ -132,12 +144,13 @@ static int list_windows (Display *disp) {
 
     /* print the list */
     for (i = 0; i < client_list_size / sizeof(Window); i++) {
+        Window win = client_list[i];
         unsigned long *desktop;
 
         /* desktop ID */
-        if ((desktop = (unsigned long *)get_property(disp, client_list[i],
+        if ((desktop = (unsigned long *)get_property(disp, win,
                         XA_CARDINAL, "_NET_WM_DESKTOP", NULL)) == NULL) {
-            desktop = (unsigned long *)get_property(disp, client_list[i],
+            desktop = (unsigned long *)get_property(disp, win,
                     XA_CARDINAL, "_WIN_WORKSPACE", NULL);
         }
 
@@ -148,18 +161,26 @@ static int list_windows (Display *disp) {
             continue;
         }
 
-        gchar *class = get_window_class(disp, client_list[i]); /* UTF8 */
-
         /* window ID */
-        printf("0x%.8lx", client_list[i]);
+        printf("0x%.8lx ", win);
 
-        printf(" %-20s ", class ? class : "N/A");
+        int x, y;
+        calculate_window_middle_x_y(disp, win, &x, &y);
+
+        /* Coordinates at the middle point of window */
+        /* Used for sorting the window list by window position */
+        printf("%d %d ", x, y);
+
+        gchar *class = get_window_class(disp, win); /* UTF8 */
+
+        printf("%-20s", class ? class : "N/A");
         printf("\n");
 
         g_free(desktop);
         g_free(class);
     }
     g_free(client_list);
+    g_free(cur_desktop);
 
     return EXIT_SUCCESS;
 }
