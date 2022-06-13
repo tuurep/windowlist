@@ -127,21 +127,21 @@ static Window *get_client_list (Display *disp, unsigned long *size) {
     return client_list;
 }
 
-static unsigned long *current_desktop (Display *disp) {
-    unsigned long *cur_desktop = NULL;
+static unsigned long *get_current_desktop (Display *disp) {
+    unsigned long *current_desktop = NULL;
     Window root = DefaultRootWindow(disp);
-    if (! (cur_desktop = (unsigned long *)get_property(disp, root,
+    if (! (current_desktop = (unsigned long *)get_property(disp, root,
             XA_CARDINAL, "_NET_CURRENT_DESKTOP", NULL))) {
-        if (! (cur_desktop = (unsigned long *)get_property(disp, root,
+        if (! (current_desktop = (unsigned long *)get_property(disp, root,
                 XA_CARDINAL, "_WIN_WORKSPACE", NULL))) {
             fputs("Cannot get current desktop properties. "
                   "(_NET_CURRENT_DESKTOP or _WIN_WORKSPACE property)"
                   "\n", stderr);
-            g_free(cur_desktop);
+            g_free(current_desktop);
             return NULL;
         }
     }
-    return cur_desktop;
+    return current_desktop;
 }
 
 static void calculate_window_middle_x_y(Display *disp, Window win, int *x, int *y) {
@@ -192,7 +192,7 @@ static int list_windows (Display *disp) {
         return EXIT_FAILURE; 
     }
 
-    unsigned long *cur_desktop = current_desktop(disp);
+    unsigned long *current_desktop = get_current_desktop(disp);
 
     /* print the list */
     for (i = 0; i < client_list_size / sizeof(Window); i++) {
@@ -209,7 +209,7 @@ static int list_windows (Display *disp) {
         /* Only list windows from the current desktop
            This also excludes windows in the 'omnipresent' desktop ID -1
            like Polybar and Rofi for example. */
-        if (*desktop != *cur_desktop) {
+        if (*desktop != *current_desktop) {
             continue;
         }
 
@@ -232,7 +232,7 @@ static int list_windows (Display *disp) {
         g_free(class);
     }
     g_free(client_list);
-    g_free(cur_desktop);
+    g_free(current_desktop);
 
     return EXIT_SUCCESS;
 }
