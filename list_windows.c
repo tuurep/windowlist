@@ -24,42 +24,11 @@
 
 #define MAX_PROPERTY_VALUE_LEN 4096
 
-/* declarations of static functions */
-static Window *get_client_list (Display *disp, unsigned long *size);
-static int list_windows (Display *disp);
-static gchar *get_window_class (Display *disp, Window win);
-static gchar *get_property (Display *disp, Window win, 
-        Atom xa_prop_type, gchar *prop_name, unsigned long *size);
-static void init_charset(void);
-static unsigned long *current_desktop (Display *disp);
-
 static struct {
     int force_utf8;
 } options;
 
 static gboolean envir_utf8;
-
-int main (int argc, char **argv) {
-    int ret = EXIT_SUCCESS;
-    Display *disp;
-
-    memset(&options, 0, sizeof(options)); /* just to be sure */
-
-    /* necessary to make g_get_charset() and g_locale_*() work */
-    setlocale(LC_ALL, "");
-
-    init_charset();
-
-    if (! (disp = XOpenDisplay(NULL))) {
-        fputs("Cannot open display.\n", stderr);
-        return EXIT_FAILURE;
-    }
-
-    ret = list_windows(disp);
-
-    XCloseDisplay(disp);
-    return ret;
-}
 
 static void init_charset (void) {
     const gchar *charset; /* unused */
@@ -85,21 +54,60 @@ static void init_charset (void) {
     }
 }
 
-static unsigned long *current_desktop (Display *disp) {
-    unsigned long *cur_desktop = NULL;
-    Window root = DefaultRootWindow(disp);
-    if (! (cur_desktop = (unsigned long *)get_property(disp, root,
-            XA_CARDINAL, "_NET_CURRENT_DESKTOP", NULL))) {
-        if (! (cur_desktop = (unsigned long *)get_property(disp, root,
-                XA_CARDINAL, "_WIN_WORKSPACE", NULL))) {
-            fputs("Cannot get current desktop properties. "
-                  "(_NET_CURRENT_DESKTOP or _WIN_WORKSPACE property)"
-                  "\n", stderr);
-            g_free(cur_desktop);
-            return NULL;
-        }
+static gchar *get_property (Display *disp, Window win,
+        Atom xa_prop_type, gchar *prop_name, unsigned long *size) {
+    Atom xa_prop_name;
+    Atom xa_ret_type;
+    int ret_format;
+    unsigned long ret_nitems;
+    unsigned long ret_bytes_after;
+    unsigned long tmp_size;
+    unsigned char *ret_prop;
+    gchar *ret;
+
+    xa_prop_name = XInternAtom(disp, prop_name, False);
+
+    /* MAX_PROPERTY_VALUE_LEN / 4 explanation (XGetWindowProperty manpage):
+     *
+     * long_length = Specifies the length in 32-bit multiples of the
+     *               data to be retrieved.
+     *
+     * NOTE:  see
+     * http://mail.gnome.org/archives/wm-spec-list/2003-March/msg00067.html
+     * In particular:
+     *
+     * 	When the X window system was ported to 64-bit architectures, a
+     *  rather peculiar design decision was made. 32-bit quantities such
+     *  as Window IDs, atoms, etc, were kept as longs in the client side
+     *  APIs, even when long was changed to 64 bits.
+     *
+     */
+    if (XGetWindowProperty(disp, win, xa_prop_name, 0, MAX_PROPERTY_VALUE_LEN / 4, False,
+                xa_prop_type, &xa_ret_type, &ret_format,
+                &ret_nitems, &ret_bytes_after, &ret_prop) != Success) {
+        return NULL;
     }
-    return cur_desktop;
+
+    if (xa_ret_type != xa_prop_type) {
+        XFree(ret_prop);
+        return NULL;
+    }
+
+    /* null terminate the result to make string handling easier */
+
+    tmp_size = (ret_format / 8) * ret_nitems;
+    /* Correct 64 Architecture implementation of 32 bit data */
+    if(ret_format==32) tmp_size *= sizeof(long)/4;
+    ret = g_malloc(tmp_size + 1);
+    memcpy(ret, ret_prop, tmp_size);
+    ret[tmp_size] = '\0';
+
+    if (size) {
+        *size = tmp_size;
+    }
+
+    XFree(ret_prop);
+    return ret;
 }
 
 static Window *get_client_list (Display *disp, unsigned long *size) {
@@ -119,6 +127,23 @@ static Window *get_client_list (Display *disp, unsigned long *size) {
     return client_list;
 }
 
+static unsigned long *current_desktop (Display *disp) {
+    unsigned long *cur_desktop = NULL;
+    Window root = DefaultRootWindow(disp);
+    if (! (cur_desktop = (unsigned long *)get_property(disp, root,
+            XA_CARDINAL, "_NET_CURRENT_DESKTOP", NULL))) {
+        if (! (cur_desktop = (unsigned long *)get_property(disp, root,
+                XA_CARDINAL, "_WIN_WORKSPACE", NULL))) {
+            fputs("Cannot get current desktop properties. "
+                  "(_NET_CURRENT_DESKTOP or _WIN_WORKSPACE property)"
+                  "\n", stderr);
+            g_free(cur_desktop);
+            return NULL;
+        }
+    }
+    return cur_desktop;
+}
+
 static void calculate_window_middle_x_y(Display *disp, Window win, int *x, int *y) {
     Window junkroot;
     int junkx, junky;
@@ -129,6 +154,33 @@ static void calculate_window_middle_x_y(Display *disp, Window win, int *x, int *
 
     *x = *x + w/2;
     *y = *y + h/2;
+}
+
+static gchar *get_window_class (Display *disp, Window win) {
+    gchar *wm_class;
+    gchar *class_utf8;
+    unsigned long size;
+
+    wm_class = get_property(disp, win, XA_STRING, "WM_CLASS", &size);
+    if (wm_class) {
+        /*
+           WM_CLASS contains two consecutive null-terminated strings:
+           <Instance>\0<Class>\0
+           We want the second one, so point after the first null-terminator.
+
+           More explanation on this pretty unintuitive window property:
+           https://unix.stackexchange.com/questions/494169/wm-class-vs-wm-instance
+        */
+        gchar *class = strchr(wm_class, '\0') + 1;
+        class_utf8 = g_locale_to_utf8(class, -1, NULL, NULL, NULL);
+    }
+    else {
+        class_utf8 = NULL;
+    }
+
+    g_free(wm_class);
+
+    return class_utf8;
 }
 
 static int list_windows (Display *disp) {
@@ -185,86 +237,24 @@ static int list_windows (Display *disp) {
     return EXIT_SUCCESS;
 }
 
-static gchar *get_window_class (Display *disp, Window win) {
-    gchar *wm_class;
-    gchar *class_utf8;
-    unsigned long size;
+int main (int argc, char **argv) {
+    int ret = EXIT_SUCCESS;
+    Display *disp;
 
-    wm_class = get_property(disp, win, XA_STRING, "WM_CLASS", &size);
-    if (wm_class) {
-        /* 
-           WM_CLASS contains two consecutive null-terminated strings:
-           <Instance>\0<Class>\0
-           We want the second one, so point after the first null-terminator.
+    memset(&options, 0, sizeof(options)); /* just to be sure */
 
-           More explanation on this pretty unintuitive window property:
-           https://unix.stackexchange.com/questions/494169/wm-class-vs-wm-instance
-        */
-        gchar *class = strchr(wm_class, '\0') + 1;
-        class_utf8 = g_locale_to_utf8(class, -1, NULL, NULL, NULL);
-    }
-    else {
-        class_utf8 = NULL;
+    /* necessary to make g_get_charset() and g_locale_*() work */
+    setlocale(LC_ALL, "");
+
+    init_charset();
+
+    if (! (disp = XOpenDisplay(NULL))) {
+        fputs("Cannot open display.\n", stderr);
+        return EXIT_FAILURE;
     }
 
-    g_free(wm_class);
+    ret = list_windows(disp);
 
-    return class_utf8;
-}
-
-static gchar *get_property (Display *disp, Window win,
-        Atom xa_prop_type, gchar *prop_name, unsigned long *size) {
-    Atom xa_prop_name;
-    Atom xa_ret_type;
-    int ret_format;
-    unsigned long ret_nitems;
-    unsigned long ret_bytes_after;
-    unsigned long tmp_size;
-    unsigned char *ret_prop;
-    gchar *ret;
-
-    xa_prop_name = XInternAtom(disp, prop_name, False);
-
-    /* MAX_PROPERTY_VALUE_LEN / 4 explanation (XGetWindowProperty manpage):
-     *
-     * long_length = Specifies the length in 32-bit multiples of the
-     *               data to be retrieved.
-     *
-     * NOTE:  see 
-     * http://mail.gnome.org/archives/wm-spec-list/2003-March/msg00067.html
-     * In particular:
-     *
-     * 	When the X window system was ported to 64-bit architectures, a
-     *  rather peculiar design decision was made. 32-bit quantities such
-     *  as Window IDs, atoms, etc, were kept as longs in the client side
-     *  APIs, even when long was changed to 64 bits.
-     *
-     */
-    if (XGetWindowProperty(disp, win, xa_prop_name, 0, MAX_PROPERTY_VALUE_LEN / 4, False,
-                xa_prop_type, &xa_ret_type, &ret_format,     
-                &ret_nitems, &ret_bytes_after, &ret_prop) != Success) {
-        return NULL;
-    }
-
-    if (xa_ret_type != xa_prop_type) {
-        XFree(ret_prop);
-        return NULL;
-    }
-
-    /* null terminate the result to make string handling easier */
-
-    tmp_size = (ret_format / 8) * ret_nitems;
-    /* Correct 64 Architecture implementation of 32 bit data */
-    if(ret_format==32) tmp_size *= sizeof(long)/4;
-    ret = g_malloc(tmp_size + 1);
-    memcpy(ret, ret_prop, tmp_size);
-    ret[tmp_size] = '\0';
-
-    if (size) {
-        *size = tmp_size;
-    }
-
-    XFree(ret_prop);
+    XCloseDisplay(disp);
     return ret;
 }
-
