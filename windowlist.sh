@@ -4,11 +4,11 @@
 
 base_dir="$HOME/.config/polybar/scripts/windowlist"
 
-active_text_color="#dfdfdf"
+active_text_color="#e0e0e0"
 active_bg=
 active_underline=
 
-inactive_text_color="#6d6d6d"
+inactive_text_color="#787878"
 inactive_bg=
 inactive_underline=
 
