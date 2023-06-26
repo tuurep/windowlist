@@ -15,8 +15,7 @@ Polybar: [link](https://github.com/polybar/polybar)
 
 ## Planned:
 
-* Update list when window positions change
-    * Currently it only updates when active window changes, or window gets added/removed
+* Fully rewrite the bash script in C
 * More styling options:
     * Style minimized window differently
     * Style visible and non-visible windows differently
@@ -46,6 +45,3 @@ Add module `windowlist` in any of `modules-left`, `modules-center` or `modules-r
 ## Dependencies:
 
 * `wmctrl`
-* `xprop`
-    * Arch: [`xorg-xprop`](https://archlinux.org/packages/extra/x86_64/xorg-xprop/)
-    * Debian: [`x11-utils`](https://packages.debian.org/bullseye/x11-utils)

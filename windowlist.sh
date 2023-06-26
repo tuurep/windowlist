@@ -34,9 +34,10 @@ main() {
 	# If no argument passed...
 	if [ -z "$2" ]; then
 		# ...print new window list every time
-		# the active window changes or
+		# the active window changes,
 		# a window is opened or closed
-		xprop -root -spy _NET_CLIENT_LIST _NET_ACTIVE_WINDOW |
+                # or a window geometry/position changes
+		"$base_dir"/eventlistener |
 			while read -r _; do
 				generate_window_list
 			done
