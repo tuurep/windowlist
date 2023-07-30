@@ -1,23 +1,14 @@
 CFLAGS = -g -O2 -Wall
+LDFLAGS = -lX11
 
-GLIB_CFLAGS = -I/usr/include/glib-2.0 \
-	      -I/usr/lib/glib-2.0/include \
-	      -pthread
+all: main windowlist.o
 
-LDADD = -lX11 -lglib-2.0
+main: main.c windowlist.o windowlist.h
+	gcc $(CFLAGS) -o main main.c windowlist.o $(LDFLAGS)
 
-all: list_windows.o list_windows eventlistener
-
-list_windows.o: list_windows.c
-	gcc $(CFLAGS) $(GLIB_CFLAGS) -c list_windows.c
-
-list_windows: list_windows.o
-	gcc $(CFLAGS) list_windows.o -o list_windows $(LDADD)
-
-eventlistener: eventlistener.c
-	gcc $(CFLAGS) eventlistener.c -o eventlistener -lX11
+windowlist.o: windowlist.c
+	gcc $(CFLAGS) -c windowlist.c
 
 clean:
-	rm list_windows.o
-	rm list_windows
-	rm eventlistener
+	rm windowlist.o
+	rm main

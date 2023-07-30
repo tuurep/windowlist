@@ -1,3 +1,2 @@
-list_windows.o
-list_windows
-eventlistener
+*.o
+main
