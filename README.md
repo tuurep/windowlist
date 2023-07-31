@@ -8,7 +8,7 @@ Windowlist has been fully rewritten in C using the relevant parts of the source 
 
 *TODO: Implement user settings*
 
-## Improvements:
+## Improvements over polywins:
 
 * Fixed a bug where names would not be correct if WM_CLASS contains spaces or dots
 * Option to sort the window list:
@@ -40,3 +40,9 @@ tail = true
 ```
 
 Add module `windowlist` in any of `modules-left`, `modules-center` or `modules-right`
+
+## Dependencies
+
+Requires an [EWMH](https://specifications.freedesktop.org/wm-spec/wm-spec-1.3.html) compliant window manager
+
+* Wikipedia list of EWMH compliant window managers: [link](https://en.wikipedia.org/wiki/Extended_Window_Manager_Hints#List_of_window_managers_that_support_Extended_Window_Manager_Hints)
