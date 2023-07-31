@@ -13,7 +13,7 @@ Windowlist has been fully rewritten in C using the relevant parts of the source 
 * Fixed a bug where names would not be correct if WM_CLASS contains spaces or dots
 * Option to sort the window list:
     * By horizontal position on the screen
-    * (Alphabetically) *Will be re-added shortly*
+    * Alphabetically
 
 ## Planned:
 

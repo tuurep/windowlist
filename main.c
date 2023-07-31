@@ -17,6 +17,14 @@ void uppercase(char *str) {
     }
 }
 
+int compare_alphabetic(const void *v1, const void *v2) {
+    const struct window_props *p1 = v1;
+    const struct window_props *p2 = v2;
+    lowercase(p1->wname);
+    lowercase(p2->wname);
+    return strcmp(p1->wname, p2->wname);
+}
+
 int compare_position(const void *v1, const void *v2) {
     // Sort wlist by horizontal position on screen
     // If tied, vertical position decides (higher first)
