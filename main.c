@@ -107,13 +107,13 @@ void spy_root_window(Display *d, char *progname) {
     }
 }
 
-Window parse_arg_wid(char *str_wid) {
+Window str_to_wid(char *str) {
     unsigned long wid;
-    if (sscanf(str_wid, "0x%lx", &wid) != 1) {
+    if (sscanf(str, "0x%lx", &wid) != 1) {
             fputs("Cannot convert argument to number.\n", stderr);
             return EXIT_FAILURE;
     }
-    return (Window)wid;
+    return (Window) wid;
 }
 
 int main(int argc, char *argv[]) {
@@ -126,7 +126,7 @@ int main(int argc, char *argv[]) {
     } else {
         // Arguments exist: handle on-click action
         char *action = argv[1];
-        Window wid = parse_arg_wid(argv[2]);
+        Window wid = str_to_wid(argv[2]);
 
         if (!strcmp(action, "--close")) {
             close_window(d, wid);
