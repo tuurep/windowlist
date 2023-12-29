@@ -23,7 +23,7 @@
 
 #define MAX_PROPERTY_VALUE_LEN 4096
 
-int client_msg(Display *d, Window w, char *msg) {
+int client_msg(Display* d, Window w, char* msg) {
     XEvent e;
     long mask = SubstructureRedirectMask | SubstructureNotifyMask;
 
@@ -42,26 +42,26 @@ int client_msg(Display *d, Window w, char *msg) {
     }
 }
 
-int close_window(Display *d, Window w) {
+int close_window(Display* d, Window w) {
     return client_msg(d, w, "_NET_CLOSE_WINDOW");
 }
 
-int raise_window(Display *d, Window w) {
+int raise_window(Display* d, Window w) {
     client_msg(d, w, "_NET_ACTIVE_WINDOW");
     XMapRaised(d, w);
     return EXIT_SUCCESS;
 }
 
-int minimize_window(Display *d, Window w) {
+int minimize_window(Display* d, Window w) {
     return !XIconifyWindow(d, w, DefaultScreen(d));
 }
 
-char *get_property(Display *d, Window w, Atom xa_prop_type, char *prop_name,
-                   unsigned long *size) {
+char* get_property(Display* d, Window w, Atom xa_prop_type, char* prop_name,
+                   unsigned long* size) {
     unsigned long ret_nitems, ret_bytes_after, tmp_size;
-    unsigned char *ret_prop;
+    unsigned char* ret_prop;
     int ret_format;
-    char *ret;
+    char* ret;
 
     Atom xa_prop_name = XInternAtom(d, prop_name, False);
     Atom xa_ret_type;
@@ -109,15 +109,15 @@ char *get_property(Display *d, Window w, Atom xa_prop_type, char *prop_name,
     return ret;
 }
 
-Window *get_client_list(Display *d, unsigned long *size) {
-    Window *client_list = NULL;
-    char *msg = NULL;
+Window* get_client_list(Display* d, unsigned long* size) {
+    Window* client_list = NULL;
+    char* msg = NULL;
 
     msg = "_NET_CLIENT_LIST or _WIN_CLIENT_LIST";
-    client_list = (Window *)get_property(d, DefaultRootWindow(d), XA_WINDOW,
+    client_list = (Window*) get_property(d, DefaultRootWindow(d), XA_WINDOW,
                                          "_NET_CLIENT_LIST", size);
     if (!client_list)
-        client_list = (Window *)get_property(d, DefaultRootWindow(d), XA_CARDINAL,
+        client_list = (Window*) get_property(d, DefaultRootWindow(d), XA_CARDINAL,
                                              "_WIN_CLIENT_LIST", size);
     if (!client_list)
         fprintf(stderr, "Cannot get client list properties.\n(%s)\n", msg);
@@ -125,22 +125,22 @@ Window *get_client_list(Display *d, unsigned long *size) {
     return client_list;
 }
 
-Window get_active_window(Display *d) {
-    char *prop;
+Window get_active_window(Display* d) {
+    char* prop;
     unsigned long size;
-    Window ret = (Window)0;
+    Window ret = (Window) 0;
 
     prop = get_property(d, DefaultRootWindow(d), XA_WINDOW,
                         "_NET_ACTIVE_WINDOW", &size);
     if (prop) {
-        ret = *((Window*)prop);
+        ret = *((Window*) prop);
         free(prop);
     }
 
     return(ret);
 }
 
-long get_desktop_id(Display *d, Window w, char *prop_name) {
+long get_desktop_id(Display* d, Window w, char* prop_name) {
     /*
         Get current desktop ID:
             w: DefaultRootWindow(d)
@@ -150,11 +150,11 @@ long get_desktop_id(Display *d, Window w, char *prop_name) {
             w: WID
             prop_name: _NET_WM_DESKTOP
     */
-    unsigned long *desktop = NULL;
+    unsigned long* desktop = NULL;
     long desktop_id;
-    if (! (desktop = (unsigned long *)get_property(d, w, XA_CARDINAL,
+    if (! (desktop = (unsigned long*) get_property(d, w, XA_CARDINAL,
                                                      prop_name, NULL))) {
-        if (! (desktop = (unsigned long *)get_property(d, w, XA_CARDINAL,
+        if (! (desktop = (unsigned long*) get_property(d, w, XA_CARDINAL,
                                                          "_WIN_WORKSPACE", NULL))) {
             fprintf(stderr, "Getting desktop property failed (%s or _WIN_WORKSPACE)\n", prop_name);
             free(desktop);
@@ -166,7 +166,7 @@ long get_desktop_id(Display *d, Window w, char *prop_name) {
     return desktop_id;
 }
 
-void calculate_window_middle_x_y(Display *d, Window w, int *x, int *y) {
+void calculate_window_middle_x_y(Display* d, Window w, int* x, int* y) {
     Window junkroot;
     int junkx, junky;
     unsigned int width, height, border_width, depth;
@@ -178,19 +178,19 @@ void calculate_window_middle_x_y(Display *d, Window w, int *x, int *y) {
     *y = *y + height/2;
 }
 
-char *get_window_class(Display *d, Window w) {
-    char *empty_wname = "N/A";
-    char *empty = malloc(strlen(empty_wname)+1 * sizeof(char));
+char* get_window_class(Display* d, Window w) {
+    char* empty_wname = "N/A";
+    char* empty = malloc(strlen(empty_wname)+1 * sizeof(char));
     strcpy(empty, empty_wname);
 
     unsigned long size;
-    char *wm_class = get_property(d, w, XA_STRING, "WM_CLASS", &size);
+    char* wm_class = get_property(d, w, XA_STRING, "WM_CLASS", &size);
 
     if (!wm_class) {
         return empty;
     }
 
-    char *class = calloc(size, sizeof(char));
+    char* class = calloc(size, sizeof(char));
 
     /*
        WM_CLASS contains two consecutive null-terminated strings:
@@ -200,7 +200,7 @@ char *get_window_class(Display *d, Window w) {
        More explanation on this pretty unintuitive window property:
        https://unix.stackexchange.com/questions/494169/wm-class-vs-wm-instance
     */
-    char *pointer_to_class = strchr(wm_class, '\0') + 1;
+    char* pointer_to_class = strchr(wm_class, '\0') + 1;
     strcpy(class, pointer_to_class);
 
     if (strlen(class) == 0) {
@@ -214,7 +214,7 @@ char *get_window_class(Display *d, Window w) {
     return class;
 }
 
-int error_catcher(Display *d, XErrorEvent *e) {
+int error_catcher(Display* d, XErrorEvent* e) {
     /*
        Ignore BadWindow error instead of halting program
 
@@ -237,8 +237,8 @@ int error_catcher(Display *d, XErrorEvent *e) {
     return EXIT_FAILURE;
 }
 
-struct window_props *generate_window_list(Display *d, int *n_wprops) {
-    Window *client_list;
+struct window_props* generate_window_list(Display* d, int* n_wprops) {
+    Window* client_list;
     unsigned long client_list_size;
 
     if (! (client_list = get_client_list(d, &client_list_size))) {
@@ -248,7 +248,7 @@ struct window_props *generate_window_list(Display *d, int *n_wprops) {
     int n_clients = client_list_size / sizeof(Window);
     *n_wprops = n_clients;
 
-    struct window_props *window_list = malloc(*n_wprops * sizeof(struct window_props));
+    struct window_props* window_list = malloc(*n_wprops * sizeof(struct window_props));
     XSetErrorHandler(error_catcher);
 
     // Populate the list

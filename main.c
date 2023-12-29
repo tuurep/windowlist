@@ -3,33 +3,34 @@
 #include <string.h>
 #include <ctype.h>
 #include <X11/Xlib.h>
+#include "toml-c.h"
 #include "windowlist.h"
 
-void lowercase(char *str) {
+void lowercase(char* str) {
     for(int i = 0; str[i]; i++) {
         str[i] = tolower(str[i]);
     }
 }
 
-void uppercase(char *str) {
+void uppercase(char* str) {
     for(int i = 0; str[i]; i++) {
         str[i] = toupper(str[i]);
     }
 }
 
-int compare_alphabetic(const void *v1, const void *v2) {
-    const struct window_props *p1 = v1;
-    const struct window_props *p2 = v2;
+int compare_alphabetic(const void* v1, const void* v2) {
+    const struct window_props* p1 = v1;
+    const struct window_props* p2 = v2;
     lowercase(p1->wname);
     lowercase(p2->wname);
     return strcmp(p1->wname, p2->wname);
 }
 
-int compare_position(const void *v1, const void *v2) {
+int compare_position(const void* v1, const void* v2) {
     // Sort wlist by horizontal position on screen
     // If tied, vertical position decides (higher first)
-    const struct window_props *p1 = v1;
-    const struct window_props *p2 = v2;
+    const struct window_props* p1 = v1;
+    const struct window_props* p2 = v2;
     if (p1->x < p2->x) return -1;
     if (p1->x > p2->x) return 1;
     if (p1->y < p2->y) return -1;
@@ -37,19 +38,19 @@ int compare_position(const void *v1, const void *v2) {
     return 0;
 }
 
-void output(struct window_props *wlist, int n, long current_desktop_id,
-            Window active_window, char *progname) {
+void output(struct window_props* wlist, int n, long current_desktop_id,
+            Window active_window, char* progname) {
     qsort(wlist, n, sizeof(struct window_props), compare_position);
 
-    char *separator = "·";
-    char *inactive_fg = "#787878";
-    char *active_fg = "#e0e0e0";
+    char* separator = "·";
+    char* inactive_fg = "#787878";
+    char* active_fg = "#e0e0e0";
 
-    char *l_click = "A1";
-    // char *m_click = "A2";
-    char *r_click = "A3";
-    // char *scroll_up = "A4";
-    // char *scroll_down = "A5";
+    char* l_click = "A1";
+    // char* m_click = "A2";
+    char* r_click = "A3";
+    // char* scroll_up = "A4";
+    // char* scroll_down = "A5";
 
     int window_count = 0;
 
@@ -82,7 +83,7 @@ void output(struct window_props *wlist, int n, long current_desktop_id,
     printf("\n");
 }
 
-void spy_root_window(Display *d, char *progname) {
+void spy_root_window(Display* d, char* progname) {
     XEvent e;
     Window root = DefaultRootWindow(d);
 
@@ -100,14 +101,14 @@ void spy_root_window(Display *d, char *progname) {
 
         if (e.type == ConfigureNotify || e.type == PropertyNotify) {
             int n;
-            struct window_props *wlist = generate_window_list(d, &n);
+            struct window_props* wlist = generate_window_list(d, &n);
             output(wlist, n, current_desktop_id, active_window, progname);
             free(wlist);
         }
     }
 }
 
-Window str_to_wid(char *str) {
+Window str_to_wid(char* str) {
     unsigned long wid;
     if (sscanf(str, "0x%lx", &wid) != 1) {
             fputs("Cannot convert argument to number.\n", stderr);
@@ -116,8 +117,8 @@ Window str_to_wid(char *str) {
     return (Window) wid;
 }
 
-int main(int argc, char *argv[]) {
-    Display *d = XOpenDisplay(NULL);
+int main(int argc, char* argv[]) {
+    Display* d = XOpenDisplay(NULL);
 
     if (argc < 2) {
         // No arguments: listen to XEvents forever
@@ -125,7 +126,7 @@ int main(int argc, char *argv[]) {
         spy_root_window(d, argv[0]);
     } else {
         // Arguments exist: handle on-click action
-        char *action = argv[1];
+        char* action = argv[1];
         Window wid = str_to_wid(argv[2]);
 
         if (!strcmp(action, "--close")) {
