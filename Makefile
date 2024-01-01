@@ -3,7 +3,7 @@ LDFLAGS = -lX11
 
 all: main windowlist.o
 
-main: main.c windowlist.o windowlist.h
+main: main.c windowlist.o windowlist.h toml-c.h
 	gcc $(CFLAGS) -o main main.c windowlist.o $(LDFLAGS)
 
 windowlist.o: windowlist.c

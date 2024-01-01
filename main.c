@@ -6,6 +6,55 @@
 #include "toml-c.h"
 #include "windowlist.h"
 
+struct configuration {
+    char sort_by[20];
+    int max_windows;
+
+    char active_window_fg_color[20];
+    char inactive_window_fg_color[20];
+    char separator_fg_color[20];
+    char overflow_fg_color[20];
+
+    char separator_string[200];
+    int spaces;
+
+    char name_case[20];
+    int name_max_length;
+
+    // TODO: window_nicknames
+} config;
+
+void copy_config_str(toml_table_t* tbl, char* option, char* config_field) {
+    // Helper function to do a repetitive free operation
+    char* toml_ptr = toml_table_string(tbl, option).u.s;
+    strcpy(config_field, toml_ptr);
+    free(toml_ptr);
+}
+
+void parse_config(char* filename) {
+    char errbuf[200];
+
+    FILE* fp = fopen(filename, "r");
+    toml_table_t* tbl = toml_parse_file(fp, errbuf, sizeof(errbuf));
+    fclose(fp);
+
+    copy_config_str(tbl, "sort_by", config.sort_by);
+    config.max_windows = toml_table_int(tbl, "max_windows").u.i;
+
+    copy_config_str(tbl, "active_window_fg_color", config.active_window_fg_color);
+    copy_config_str(tbl, "inactive_window_fg_color", config.inactive_window_fg_color);
+    copy_config_str(tbl, "separator_fg_color", config.separator_fg_color);
+    copy_config_str(tbl, "overflow_fg_color", config.overflow_fg_color);
+
+    copy_config_str(tbl, "separator_string", config.separator_string);
+    config.spaces = toml_table_int(tbl, "spaces").u.i;
+
+    copy_config_str(tbl, "name_case", config.name_case);
+    config.name_max_length = toml_table_int(tbl, "name_max_length").u.i;
+
+    toml_free(tbl);
+}
+
 void lowercase(char* str) {
     for(int i = 0; str[i]; i++) {
         str[i] = tolower(str[i]);
@@ -21,9 +70,9 @@ void uppercase(char* str) {
 int compare_alphabetic(const void* v1, const void* v2) {
     const struct window_props* p1 = v1;
     const struct window_props* p2 = v2;
-    lowercase(p1->wname);
-    lowercase(p2->wname);
-    return strcmp(p1->wname, p2->wname);
+    lowercase(p1->name);
+    lowercase(p2->name);
+    return strcmp(p1->name, p2->name);
 }
 
 int compare_position(const void* v1, const void* v2) {
@@ -38,13 +87,20 @@ int compare_position(const void* v1, const void* v2) {
     return 0;
 }
 
-void output(struct window_props* wlist, int n, long current_desktop_id,
-            Window active_window, char* progname) {
-    qsort(wlist, n, sizeof(struct window_props), compare_position);
+void print_spaces() {
+    for (int i = 0; i < config.spaces; i++) {
+        printf(" ");
+    }
+}
 
-    char* separator = "·";
-    char* inactive_fg = "#787878";
-    char* active_fg = "#e0e0e0";
+void output(struct window_props* wlist, int n, Window active_window, char* progname) {
+
+    if (!strcmp(config.sort_by, "alphabetic")) {
+        qsort(wlist, n, sizeof(struct window_props), compare_alphabetic);
+    }
+    if (!strcmp(config.sort_by, "position")) {
+        qsort(wlist, n, sizeof(struct window_props), compare_position);
+    }
 
     char* l_click = "A1";
     // char* m_click = "A2";
@@ -55,31 +111,59 @@ void output(struct window_props* wlist, int n, long current_desktop_id,
     int window_count = 0;
 
     for (int i = 0; i < n; i++) {
-        if (wlist[i].desktop_id == current_desktop_id) {
-            Window wid = wlist[i].window;
-
-            if (window_count > 0)
-                printf("%%{F%s}%s%%{F-}", inactive_fg, separator);
-
-            printf("%%{%s:%s %s 0x%lx:}", r_click, progname, "--close", wid);
-
-            if (wid != active_window) {
-                printf("%%{%s:%s %s 0x%lx:}", l_click, progname, "--raise", wid);
-                printf("%%{F%s}", inactive_fg);
-            } else {
-                printf("%%{%s:%s %s 0x%lx:}", l_click, progname, "--minimize", wid);
-                printf("%%{F%s}", active_fg);
-            }
-
-            lowercase(wlist[i].wname);
-            printf(" %s ", wlist[i].wname);
-
-            printf("%%{F-}%%{A}%%{A}");
-
+        if (window_count > config.max_windows) {
             window_count++;
+            continue;
         }
-        free(wlist[i].wname);
+
+        Window wid = wlist[i].id;
+
+        if (window_count > 0) {
+            printf("%%{F%s}%s%%{F-}", config.separator_fg_color, config.separator_string);
+        }
+
+        printf("%%{%s:%s %s 0x%lx:}", r_click, progname, "--close", wid);
+
+        if (wid != active_window) {
+            printf("%%{%s:%s %s 0x%lx:}", l_click, progname, "--raise", wid);
+            printf("%%{F%s}", config.inactive_window_fg_color);
+        } else {
+            printf("%%{%s:%s %s 0x%lx:}", l_click, progname, "--minimize", wid);
+            printf("%%{F%s}", config.active_window_fg_color);
+        }
+
+        if (!strcmp(config.name_case, "lowercase")) {
+            lowercase(wlist[i].name);
+        }
+        if (!strcmp(config.name_case, "uppercase")) {
+            uppercase(wlist[i].name);
+        }
+
+        if (window_count != 0) {
+            print_spaces();
+        }
+
+        printf("%.*s", config.name_max_length, wlist[i].name);
+
+        if (strlen(wlist[i].name) > config.name_max_length) {
+            // Name is truncated
+            printf("‥");
+        }
+
+        print_spaces();
+
+        printf("%%{F-}%%{A}%%{A}");
+
+        window_count++;
+        free(wlist[i].name);
     }
+
+    if (window_count > config.max_windows) {
+        printf("%%{F%s}", config.overflow_fg_color);
+        printf("(+%d)", window_count - config.max_windows);
+        printf("%%{F-}");
+    }
+
     printf("\n");
 }
 
@@ -101,8 +185,8 @@ void spy_root_window(Display* d, char* progname) {
 
         if (e.type == ConfigureNotify || e.type == PropertyNotify) {
             int n;
-            struct window_props* wlist = generate_window_list(d, &n);
-            output(wlist, n, current_desktop_id, active_window, progname);
+            struct window_props* wlist = generate_window_list(d, current_desktop_id, &n);
+            output(wlist, n, active_window, progname);
             free(wlist);
         }
     }
@@ -118,6 +202,8 @@ Window str_to_wid(char* str) {
 }
 
 int main(int argc, char* argv[]) {
+    parse_config("config.toml");
+
     Display* d = XOpenDisplay(NULL);
 
     if (argc < 2) {

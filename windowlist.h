@@ -1,11 +1,10 @@
 struct window_props {
-    Window window;
-    long desktop_id;
-    char* wname;
+    Window id;
+    char* name;
     int x, y;
 };
 
-struct window_props* generate_window_list(Display* d, int* n_wprops);
+struct window_props* generate_window_list(Display* d, long current_desktop_id, int* n_wprops);
 Window get_active_window(Display* d);
 long get_desktop_id(Display* d, Window w, char* prop_name);
 int close_window(Display* d, Window w);
