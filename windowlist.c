@@ -263,8 +263,8 @@ struct window_props* generate_window_list(Display* d, long current_desktop_id, i
         }
 
         struct window_props wp;
-        wp.window = w;
-        wp.wname = get_window_class(d, w);
+        wp.id = w;
+        wp.name = get_window_class(d, w);
         calculate_window_middle_x_y(d, w, &wp.x, &wp.y);
 
         window_list[w_count] = wp;
