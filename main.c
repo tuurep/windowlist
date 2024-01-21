@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <libgen.h>
 #include <ctype.h>
 #include <X11/Xlib.h>
 #include "toml-c.h"
@@ -31,12 +32,21 @@ void copy_config_str(toml_table_t* tbl, char* option, char* config_field) {
     free(toml_ptr);
 }
 
-void parse_config(char* filename) {
+void parse_config(char* filename, char* executable_path) {
+    int max_path_length = 200;
+    char config_path[max_path_length];
+
+    // create path to config file relative to the executable
+    char* dir = dirname(STRDUP(executable_path)); // without dup, argv[0] gets modified by dirname()
+    snprintf(config_path, max_path_length, "%s/%s", dir, filename);
+
     char errbuf[200];
 
-    FILE* fp = fopen(filename, "r");
+    FILE* fp = fopen(config_path, "r");
     toml_table_t* tbl = toml_parse_file(fp, errbuf, sizeof(errbuf));
     fclose(fp);
+
+    free(dir);
 
     copy_config_str(tbl, "sort_by", config.sort_by);
     config.max_windows = toml_table_int(tbl, "max_windows").u.i;
@@ -93,7 +103,7 @@ void print_spaces() {
     }
 }
 
-void output(struct window_props* wlist, int n, Window active_window, char* progname) {
+void output(struct window_props* wlist, int n, Window active_window, char* executable_path) {
 
     if (!strcmp(config.sort_by, "alphabetic")) {
         qsort(wlist, n, sizeof(struct window_props), compare_alphabetic);
@@ -122,13 +132,13 @@ void output(struct window_props* wlist, int n, Window active_window, char* progn
             printf("%%{F%s}%s%%{F-}", config.separator_fg_color, config.separator_string);
         }
 
-        printf("%%{%s:%s %s 0x%lx:}", r_click, progname, "--close", wid);
+        printf("%%{%s:%s %s 0x%lx:}", r_click, executable_path, "--close", wid);
 
         if (wid != active_window) {
-            printf("%%{%s:%s %s 0x%lx:}", l_click, progname, "--raise", wid);
+            printf("%%{%s:%s %s 0x%lx:}", l_click, executable_path, "--raise", wid);
             printf("%%{F%s}", config.inactive_window_fg_color);
         } else {
-            printf("%%{%s:%s %s 0x%lx:}", l_click, progname, "--minimize", wid);
+            printf("%%{%s:%s %s 0x%lx:}", l_click, executable_path, "--minimize", wid);
             printf("%%{F%s}", config.active_window_fg_color);
         }
 
@@ -167,7 +177,7 @@ void output(struct window_props* wlist, int n, Window active_window, char* progn
     printf("\n");
 }
 
-void spy_root_window(Display* d, char* progname) {
+void spy_root_window(Display* d, char* executable_path) {
     XEvent e;
     Window root = DefaultRootWindow(d);
 
@@ -186,7 +196,7 @@ void spy_root_window(Display* d, char* progname) {
         if (e.type == ConfigureNotify || e.type == PropertyNotify) {
             int n;
             struct window_props* wlist = generate_window_list(d, current_desktop_id, &n);
-            output(wlist, n, active_window, progname);
+            output(wlist, n, active_window, executable_path);
             free(wlist);
         }
     }
@@ -202,8 +212,7 @@ Window str_to_wid(char* str) {
 }
 
 int main(int argc, char* argv[]) {
-    parse_config("config.toml");
-
+    parse_config("config.toml", argv[0]);
     Display* d = XOpenDisplay(NULL);
 
     if (argc < 2) {
