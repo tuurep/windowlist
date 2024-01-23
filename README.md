@@ -1,5 +1,7 @@
 # windowlist
 
+![screenshot](screenshot.png)
+
 Began as a fork of my favorite Polybar script [polywins](https://github.com/uniquepointer/polywins)
 
 Windowlist has been fully rewritten in C using the relevant parts of the source code from [wmctrl](https://github.com/Conservatory/wmctrl) and [xprop](https://gitlab.freedesktop.org/xorg/app/xprop).
@@ -29,7 +31,7 @@ Add module in `~/.config/polybar/config.ini`:
 ```ini
 [module/windowlist]
 type = custom/script
-exec = ~/.config/polybar/scripts/windowlist/main 2>/dev/null
+exec = ~/.config/polybar/scripts/windowlist/main 2> /dev/null
 label-padding = 1
 tail = true
 ```
