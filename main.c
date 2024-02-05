@@ -19,6 +19,7 @@ struct configuration {
     char separator_string[200];
     int spaces;
 
+    char name[20];
     char name_case[20];
     int name_max_length;
 
@@ -59,6 +60,7 @@ void parse_config(char* filename, char* executable_path) {
     copy_config_str(tbl, "separator_string", config.separator_string);
     config.spaces = toml_table_int(tbl, "spaces").u.i;
 
+    copy_config_str(tbl, "name", config.name);
     copy_config_str(tbl, "name_case", config.name_case);
     config.name_max_length = toml_table_int(tbl, "name_max_length").u.i;
 
@@ -80,9 +82,9 @@ void uppercase(char* str) {
 int compare_alphabetic(const void* v1, const void* v2) {
     const struct window_props* p1 = v1;
     const struct window_props* p2 = v2;
-    lowercase(p1->name);
-    lowercase(p2->name);
-    return strcmp(p1->name, p2->name);
+    lowercase(p1->class);
+    lowercase(p2->class);
+    return strcmp(p1->class, p2->class);
 }
 
 int compare_position(const void* v1, const void* v2) {
@@ -142,20 +144,27 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
             printf("%%{F%s}", config.active_window_fg_color);
         }
 
+        char* display;
+        if (!strcmp(config.name, "title")) {
+          display = wlist[i].title;
+        } else {
+          display = wlist[i].class;
+        }
+
         if (!strcmp(config.name_case, "lowercase")) {
-            lowercase(wlist[i].name);
+            lowercase(display);
         }
         if (!strcmp(config.name_case, "uppercase")) {
-            uppercase(wlist[i].name);
+            uppercase(display);
         }
 
         if (window_count != 0) {
             print_spaces();
         }
 
-        printf("%.*s", config.name_max_length, wlist[i].name);
+        printf("%.*s", config.name_max_length, display);
 
-        if (strlen(wlist[i].name) > config.name_max_length) {
+        if (strlen(display) > config.name_max_length) {
             // Name is truncated
             printf("‥");
         }
@@ -165,7 +174,8 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
         printf("%%{F-}%%{A}%%{A}");
 
         window_count++;
-        free(wlist[i].name);
+        free(wlist[i].class);
+        free(wlist[i].title);
     }
 
     if (window_count > config.max_windows) {

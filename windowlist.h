@@ -1,6 +1,9 @@
+#include <X11/Xlib.h>
+
 struct window_props {
     Window id;
-    char* name;
+    char* class;
+    char* title;
     int x, y;
 };
 
