@@ -234,9 +234,9 @@ char* get_window_title(Display *d, Window w) {
             strcpy(title_utf8, wm_name);
         }
         else {
-          free(wm_name);
-          free(net_wm_name);
-          return empty;
+            free(wm_name);
+            free(net_wm_name);
+            return empty;
         }
     }
 
