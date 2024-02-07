@@ -79,7 +79,7 @@ void uppercase(char* str) {
     }
 }
 
-int compare_alphabetic(const void* v1, const void* v2) {
+int compare_window_class(const void* v1, const void* v2) {
     const struct window_props* p1 = v1;
     const struct window_props* p2 = v2;
     lowercase(p1->class);
@@ -107,8 +107,8 @@ void print_spaces() {
 
 void output(struct window_props* wlist, int n, Window active_window, char* executable_path) {
 
-    if (!strcmp(config.sort_by, "alphabetic")) {
-        qsort(wlist, n, sizeof(struct window_props), compare_alphabetic);
+    if (!strcmp(config.sort_by, "application")) {
+        qsort(wlist, n, sizeof(struct window_props), compare_window_class);
     }
     if (!strcmp(config.sort_by, "position")) {
         qsort(wlist, n, sizeof(struct window_props), compare_position);

@@ -11,7 +11,7 @@ Windowlist has been fully rewritten in C using the relevant parts of the source 
 * Fixed a bug where names would not be correct if WM_CLASS contains spaces or dots
 * Option to sort the window list:
     * By horizontal position on the screen
-    * Alphabetically
+    * By the application name
 
 ## Planned
 
@@ -58,7 +58,7 @@ All options are detailed here:
                 <ul>
                     <li><code>"none"</code>: unordered (WM client list order)</li>
                     <li><code>"position"</code>: sort based on horizontal position on the screen</li>
-                    <li><code>"alphabetic"</code>: sort alphabetically based on window name</li>
+                    <li><code>"application"</code>: sort alphabetically based on application name</li>
                 <ul>
             </td>
         </tr>
