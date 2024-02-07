@@ -144,27 +144,27 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
             printf("%%{F%s}", config.active_window_fg_color);
         }
 
-        char* display;
+        char* window_name;
         if (!strcmp(config.name, "title")) {
-          display = wlist[i].title;
+            window_name = wlist[i].title;
         } else {
-          display = wlist[i].class;
+            window_name = wlist[i].class;
         }
 
         if (!strcmp(config.name_case, "lowercase")) {
-            lowercase(display);
+            lowercase(window_name);
         }
         if (!strcmp(config.name_case, "uppercase")) {
-            uppercase(display);
+            uppercase(window_name);
         }
 
         if (window_count != 0) {
             print_spaces();
         }
 
-        printf("%.*s", config.name_max_length, display);
+        printf("%.*s", config.name_max_length, window_name);
 
-        if (strlen(display) > config.name_max_length) {
+        if (strlen(window_name) > config.name_max_length) {
             // Name is truncated
             printf("‥");
         }
