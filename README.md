@@ -58,7 +58,7 @@ All options are detailed here:
                 <ul>
                     <li><code>"none"</code>: unordered (WM client list order)</li>
                     <li><code>"position"</code>: sort based on horizontal position on the screen</li>
-                    <li><code>"application"</code>: sort alphabetically based on application name</li>
+                    <li><code>"application"</code>: sort alphabetically based on the application class</li>
                 <ul>
             </td>
         </tr>
@@ -96,6 +96,16 @@ All options are detailed here:
             <td><code>spaces</code></td>
             <td>How many spaces to add between window name and separator. Note that this space is part of the clickable area for a window name.</td>
             <td align="center">number (int)</td>
+        </tr>
+        <tr>
+            <td><code>name</code></td>
+            <td>Text to display</td>
+            <td>
+                <ul>
+                    <li><code>"class"</code>: display the window class</li>
+                    <li><code>"title"</code>: display the window title</li>
+                </ul>
+            </td>
         </tr>
         <tr>
             <td><code>name_case</code></td>

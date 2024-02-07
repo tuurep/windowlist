@@ -9,7 +9,7 @@ overflow_fg_color = "#f0c674"
 separator_string = "·"
 spaces = 1
 
-name = "class" # "title" | "class"
+name = "class" # "class" | "title"
 name_case = "lowercase" # "none" | "lowercase" | "uppercase"
 name_max_length = 30
 
