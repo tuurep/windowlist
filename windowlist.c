@@ -17,7 +17,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include "windowlist.h"
 
@@ -214,6 +213,40 @@ char* get_window_class(Display* d, Window w) {
     return class;
 }
 
+char* get_window_title(Display *d, Window w) {
+    char* empty_wname = "N/A";
+    char* empty = malloc(strlen(empty_wname)+1 * sizeof(char));
+    strcpy(empty, empty_wname);
+
+    char* title_utf8;
+
+    char* wm_name = get_property(d, w, XA_STRING, "WM_NAME", NULL);
+    char* net_wm_name = get_property(d, w,
+            XInternAtom(d, "UTF8_STRING", False), "_NET_WM_NAME", NULL);
+
+    if (net_wm_name) {
+        title_utf8 = calloc(strlen(net_wm_name) + 1, sizeof(char));
+        strcpy(title_utf8, net_wm_name);
+    }
+    else {
+        if (wm_name) {
+            title_utf8 = calloc(strlen(wm_name) + 1, sizeof(char));
+            strcpy(title_utf8, wm_name);
+        }
+        else {
+            free(wm_name);
+            free(net_wm_name);
+            return empty;
+        }
+    }
+
+    free(empty);
+    free(wm_name);
+    free(net_wm_name);
+
+    return title_utf8;
+}
+
 int error_catcher(Display* d, XErrorEvent* e) {
     /*
        Ignore BadWindow error instead of halting program
@@ -264,7 +297,8 @@ struct window_props* generate_window_list(Display* d, long current_desktop_id, i
 
         struct window_props wp;
         wp.id = w;
-        wp.name = get_window_class(d, w);
+        wp.class = get_window_class(d, w);
+        wp.title = get_window_title(d, w);
         calculate_window_middle_x_y(d, w, &wp.x, &wp.y);
 
         window_list[w_count] = wp;
