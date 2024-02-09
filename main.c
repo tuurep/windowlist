@@ -236,9 +236,8 @@ void spy_root_window(Display* d, char* executable_path) {
         if (e.type == ConfigureNotify || e.type == PropertyNotify) {
             int n;
             struct window_props* wlist = generate_window_list(d, current_desktop_id, &n);
-            output(wlist, n, active_window, executable_path);
-
             configure_windows_notify(d, prev_wlist, prev_wlist_len, wlist, n);
+            output(wlist, n, active_window, executable_path);
 
             free(prev_wlist);
             prev_wlist = wlist;
