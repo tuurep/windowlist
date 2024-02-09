@@ -188,33 +188,27 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
 }
 
 void configure_windows_notify(Display* d, struct window_props* prev_wlist, int prev_wlist_len, struct window_props* wlist, int n) {
-    if (prev_wlist != NULL) {
-        for (int i = 0; i < prev_wlist_len; i++) {
-            bool found = false;
-            for (int j = 0; j < n; j++) {
-                if (prev_wlist[i].id == wlist[j].id) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                // XSelectInput(d, prev_wlist[i].id, NoEventMask);
+    for (int i = 0; i < prev_wlist_len; i++) {
+        bool found = false;
+        for (int j = 0; j < n; j++) {
+            if (prev_wlist[i].id == wlist[j].id) {
+                found = true;
+                break;
             }
         }
-        for (int i = 0; i < n; i++) {
-            bool found = false;
-            for (int j = 0; j < prev_wlist_len; j++) {
-                if (wlist[i].id == prev_wlist[j].id) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                XSelectInput(d, wlist[i].id, PropertyChangeMask);
+        if (!found) {
+            // XSelectInput(d, prev_wlist[i].id, NoEventMask);
+        }
+    }
+    for (int i = 0; i < n; i++) {
+        bool found = false;
+        for (int j = 0; j < prev_wlist_len; j++) {
+            if (wlist[i].id == prev_wlist[j].id) {
+                found = true;
+                break;
             }
         }
-    } else {
-        for (int i = 0; i < n; i++) {
+        if (!found) {
             XSelectInput(d, wlist[i].id, PropertyChangeMask);
         }
     }
@@ -246,9 +240,7 @@ void spy_root_window(Display* d, char* executable_path) {
 
             configure_windows_notify(d, prev_wlist, prev_wlist_len, wlist, n);
 
-            if (prev_wlist != NULL) {
-                free(prev_wlist);
-            }
+            free(prev_wlist);
             prev_wlist = wlist;
             prev_wlist_len = n;
         }
