@@ -13,13 +13,6 @@ Windowlist has been fully rewritten in C using the relevant parts of the source 
     * By horizontal position on the screen
     * By the application name
 
-## Planned
-
-* Window naming configurability:
-    * Window nicknames (Example: `telegram-desktop` -> `telegram`)
-* More styling options:
-    * Style minimized window differently
-
 ## Installation
 
 Project directory should be in `~/.config/polybar/scripts/`
@@ -127,13 +120,6 @@ All options are detailed here:
 </table>
 
 Note: polybar must be reset before changes take effect.
-
-**Config TODO:**
-
-* window nicknames list (more complicated to do than simple string/int options)
-* bring back some options that were in polywins:
-    * active window underline
-    * background colors
 
 ## Dependencies
 
