@@ -158,9 +158,7 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
             uppercase(window_name);
         }
 
-        if (window_count != 0) {
-            print_spaces();
-        }
+        print_spaces();
 
         printf("%.*s", config.name_max_length, window_name);
 
