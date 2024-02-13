@@ -185,6 +185,21 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
     printf("\n");
 }
 
+void configure_windows_notify(Display* d, struct window_props* prev_wlist, int prev_wlist_len, struct window_props* wlist, int n) {
+    for (int i = 0; i < n; i++) {
+        bool found = false;
+        for (int j = 0; j < prev_wlist_len; j++) {
+            if (wlist[i].id == prev_wlist[j].id) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            XSelectInput(d, wlist[i].id, PropertyChangeMask);
+        }
+    }
+}
+
 void spy_root_window(Display* d, char* executable_path) {
     XEvent e;
     Window root = DefaultRootWindow(d);
@@ -193,6 +208,9 @@ void spy_root_window(Display* d, char* executable_path) {
     // ConfigureNotify is sent when a window's size or position changes
     // PropertyNotify for changes in client list and active window
     XSelectInput(d, root, SubstructureNotifyMask | PropertyChangeMask);
+
+    struct window_props* prev_wlist = NULL;
+    int prev_wlist_len = 0;
 
     for (;;) {
         fflush(stdout);
@@ -204,8 +222,12 @@ void spy_root_window(Display* d, char* executable_path) {
         if (e.type == ConfigureNotify || e.type == PropertyNotify) {
             int n;
             struct window_props* wlist = generate_window_list(d, current_desktop_id, &n);
+            configure_windows_notify(d, prev_wlist, prev_wlist_len, wlist, n);
             output(wlist, n, active_window, executable_path);
-            free(wlist);
+
+            free(prev_wlist);
+            prev_wlist = wlist;
+            prev_wlist_len = n;
         }
     }
 }
