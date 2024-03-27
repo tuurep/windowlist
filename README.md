@@ -25,7 +25,6 @@ Add module in `~/.config/polybar/config.ini`:
 [module/windowlist]
 type = custom/script
 exec = ~/.config/polybar/scripts/windowlist/main 2> /dev/null
-label-padding = 1
 tail = true
 ```
 
