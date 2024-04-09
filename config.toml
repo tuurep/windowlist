@@ -1,19 +1,16 @@
 sort_by = "position" # "none" | "position" | "application"
 max_windows = 13
 
-active_window_fg_color = "#e0e0e0"
-inactive_window_fg_color = "#787878"
-separator_fg_color = "#787878"
-overflow_fg_color = "#f0c674"
-
-separator_string = "·"
-spaces = 1
-
 name = "class" # "class" | "title"
 name_case = "lowercase" # "none" | "lowercase" | "uppercase"
 name_max_length = 30
 
-# TODO:
-# window_nicknames = [
-    # { "TelegramDesktop", "telegram" }
-# ]
+empty_desktop_string = ""
+separator_string = "·"
+spaces = 1
+
+active_window_fg_color = "#e0e0e0"
+inactive_window_fg_color = "#808080"
+empty_desktop_fg_color = "#e0e0e0"
+separator_fg_color = "#808080"
+overflow_fg_color = "#e8c47b"

@@ -60,42 +60,12 @@ All options are detailed here:
             <td align="center">number (int)</td>
         </tr>
         <tr>
-            <td><code>active_window_fg_color</code></td>
-            <td>Foreground color for the currently focused window</td>
-            <td align="center">hex color (string)</td>
-        </tr>
-        <tr>
-            <td><code>inactive_window_fg_color</code></td>
-            <td>Foreground color for unfocused windows</td>
-            <td align="center">hex color (string)</td>
-        </tr>
-        <tr>
-            <td><code>separator_fg_color</code></td>
-            <td>Foreground color for the string between window names</td>
-            <td align="center">hex color (string)</td>
-        </tr>
-        <tr>
-            <td><code>overflow_fg_color</code></td>
-            <td>Foreground color for the string that indicates max windows exceeding e.g. <code>(+3)</code></td>
-            <td align="center">hex color (string)</td>
-        </tr>
-        <tr>
-            <td><code>separator_string</code></td>
-            <td>String displayed between window names</td>
-            <td align="center">any string</td>
-        </tr>
-        <tr>
-            <td><code>spaces</code></td>
-            <td>How many spaces to add between window name and separator. Note that this space is part of the clickable area for a window name.</td>
-            <td align="center">number (int)</td>
-        </tr>
-        <tr>
             <td><code>name</code></td>
-            <td>Text to display</td>
+            <td>Which X window property is considered window name (label for a window)</td>
             <td>
                 <ul>
-                    <li><code>"class"</code>: display the window class</li>
-                    <li><code>"title"</code>: display the window title</li>
+                    <li><code>"class"</code>: WM_CLASS</li>
+                    <li><code>"title"</code>: WM_NAME</li>
                 </ul>
             </td>
         </tr>
@@ -114,6 +84,46 @@ All options are detailed here:
             <td><code>name_max_length</code></td>
             <td>Maximum length for a window name before it's truncated with <code>‥</code></td>
             <td align="center">number (int)</td>
+        </tr>
+        <tr>
+            <td><code>empty_desktop_string</code></td>
+            <td>String to show when no windows are open</td>
+            <td align="center">any string</td>
+        </tr>
+        <tr>
+            <td><code>separator_string</code></td>
+            <td>String displayed between window names</td>
+            <td align="center">any string</td>
+        </tr>
+        <tr>
+            <td><code>spaces</code></td>
+            <td>How many spaces to add between window name and separator. Note that this space is part of the clickable area for a window name.</td>
+            <td align="center">number (int)</td>
+        </tr>
+        <tr>
+            <td><code>active_window_fg_color</code></td>
+            <td>Foreground color for the currently focused window</td>
+            <td align="center">hex color (string)</td>
+        </tr>
+        <tr>
+            <td><code>inactive_window_fg_color</code></td>
+            <td>Foreground color for unfocused windows</td>
+            <td align="center">hex color (string)</td>
+        </tr>
+        <tr>
+            <td><code>empty_desktop_fg_color</code></td>
+            <td>Foreground color for the string shown when no windows are open</td>
+            <td align="center">hex color (string)</td>
+        </tr>
+        <tr>
+            <td><code>separator_fg_color</code></td>
+            <td>Foreground color for the string between window names</td>
+            <td align="center">hex color (string)</td>
+        </tr>
+        <tr>
+            <td><code>overflow_fg_color</code></td>
+            <td>Foreground color for the string that indicates max windows exceeding e.g. <code>(+3)</code></td>
+            <td align="center">hex color (string)</td>
         </tr>
     </tbody>
 </table>

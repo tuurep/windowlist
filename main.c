@@ -11,19 +11,19 @@ struct configuration {
     char sort_by[20];
     int max_windows;
 
-    char active_window_fg_color[20];
-    char inactive_window_fg_color[20];
-    char separator_fg_color[20];
-    char overflow_fg_color[20];
-
-    char separator_string[200];
-    int spaces;
-
     char name[20];
     char name_case[20];
     int name_max_length;
 
-    // TODO: window_nicknames
+    char empty_desktop_string[200];
+    char separator_string[200];
+    int spaces;
+
+    char active_window_fg_color[20];
+    char inactive_window_fg_color[20];
+    char empty_desktop_fg_color[20];
+    char separator_fg_color[20];
+    char overflow_fg_color[20];
 } config;
 
 void copy_config_str(toml_table_t* tbl, char* option, char* config_field) {
@@ -52,17 +52,19 @@ void parse_config(char* filename, char* executable_path) {
     copy_config_str(tbl, "sort_by", config.sort_by);
     config.max_windows = toml_table_int(tbl, "max_windows").u.i;
 
-    copy_config_str(tbl, "active_window_fg_color", config.active_window_fg_color);
-    copy_config_str(tbl, "inactive_window_fg_color", config.inactive_window_fg_color);
-    copy_config_str(tbl, "separator_fg_color", config.separator_fg_color);
-    copy_config_str(tbl, "overflow_fg_color", config.overflow_fg_color);
-
-    copy_config_str(tbl, "separator_string", config.separator_string);
-    config.spaces = toml_table_int(tbl, "spaces").u.i;
-
     copy_config_str(tbl, "name", config.name);
     copy_config_str(tbl, "name_case", config.name_case);
     config.name_max_length = toml_table_int(tbl, "name_max_length").u.i;
+
+    copy_config_str(tbl, "empty_desktop_string", config.empty_desktop_string);
+    copy_config_str(tbl, "separator_string", config.separator_string);
+    config.spaces = toml_table_int(tbl, "spaces").u.i;
+
+    copy_config_str(tbl, "active_window_fg_color", config.active_window_fg_color);
+    copy_config_str(tbl, "inactive_window_fg_color", config.inactive_window_fg_color);
+    copy_config_str(tbl, "empty_desktop_fg_color", config.empty_desktop_fg_color);
+    copy_config_str(tbl, "separator_fg_color", config.separator_fg_color);
+    copy_config_str(tbl, "overflow_fg_color", config.overflow_fg_color);
 
     toml_free(tbl);
 }
@@ -174,6 +176,12 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
         window_count++;
         free(wlist[i].class);
         free(wlist[i].title);
+    }
+
+    if (window_count == 0) {
+        printf("%%{F%s}", config.empty_desktop_fg_color);
+        printf(config.empty_desktop_string);
+        printf("%%{F-}");
     }
 
     if (window_count > config.max_windows) {
