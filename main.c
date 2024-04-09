@@ -107,6 +107,46 @@ void print_spaces() {
     }
 }
 
+int unused(char* option) {
+    if (option[0] == '\0' || !strcmp(option, "none")) {
+        return 1;
+    }
+    return 0;
+}
+
+void print_polybar_str(char* label, char* fg_color, /* char* bg_color, */ /* char* ul_color, */
+                       char* l_click, /* char* m_click, */ char* r_click, /* char* scroll_up, */ /* char* scroll_down, */
+                       int should_print_spaces) {
+
+    int actions_count = 0;
+
+    if (!unused(l_click)) {
+        printf("%%{A1:%s:}", l_click);
+        actions_count++;
+    }
+
+    if (!unused(r_click)) {
+        printf("%%{A3:%s:}", r_click);
+        actions_count++;
+    }
+
+    if (should_print_spaces) {
+        print_spaces();
+    }
+
+    printf("%%{F%s}", fg_color);
+    printf(label);
+    printf("%%{F-}");
+
+    if (should_print_spaces) {
+        print_spaces();
+    }
+    
+    for (int i = 0; i < actions_count; i++) {
+        printf("%%{A}");
+    }
+}
+
 void output(struct window_props* wlist, int n, Window active_window, char* executable_path) {
 
     if (!strcmp(config.sort_by, "application")) {
@@ -116,12 +156,6 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
         qsort(wlist, n, sizeof(struct window_props), compare_position);
     }
 
-    char* l_click = "A1";
-    // char* m_click = "A2";
-    char* r_click = "A3";
-    // char* scroll_up = "A4";
-    // char* scroll_down = "A5";
-
     int window_count = 0;
 
     for (int i = 0; i < n; i++) {
@@ -130,27 +164,38 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
             continue;
         }
 
-        Window wid = wlist[i].id;
-
         if (window_count > 0) {
-            printf("%%{F%s}%s%%{F-}", config.separator_fg_color, config.separator_string);
+            print_polybar_str(config.separator_string, config.separator_fg_color, "", "", 0);
         }
 
-        printf("%%{%s:%s %s 0x%lx:}", r_click, executable_path, "--close", wid);
+        Window wid = wlist[i].id;
+
+        char l_click[200];
+        char r_click[200];
+
+        snprintf(r_click, 200, "%s %s 0x%lx", executable_path, "--close", wid);
+
+        char* window_fg_color;
 
         if (wid != active_window) {
-            printf("%%{%s:%s %s 0x%lx:}", l_click, executable_path, "--raise", wid);
-            printf("%%{F%s}", config.inactive_window_fg_color);
+            snprintf(l_click, 200, "%s %s 0x%lx", executable_path, "--raise", wid);
+            window_fg_color = config.inactive_window_fg_color;
         } else {
-            printf("%%{%s:%s %s 0x%lx:}", l_click, executable_path, "--minimize", wid);
-            printf("%%{F%s}", config.active_window_fg_color);
+            snprintf(l_click, 200, "%s %s 0x%lx", executable_path, "--minimize", wid);
+            window_fg_color = config.active_window_fg_color;
         }
 
         char* window_name;
+
         if (!strcmp(config.name, "title")) {
             window_name = wlist[i].title;
         } else {
             window_name = wlist[i].class;
+        }
+
+        if (strlen(window_name) > config.name_max_length) {
+            // Name is truncated
+            strcpy(window_name + config.name_max_length, "‥");
         }
 
         if (!strcmp(config.name_case, "lowercase")) {
@@ -160,18 +205,7 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
             uppercase(window_name);
         }
 
-        print_spaces();
-
-        printf("%.*s", config.name_max_length, window_name);
-
-        if (strlen(window_name) > config.name_max_length) {
-            // Name is truncated
-            printf("‥");
-        }
-
-        print_spaces();
-
-        printf("%%{F-}%%{A}%%{A}");
+        print_polybar_str(window_name, window_fg_color, l_click, r_click, 1);
 
         window_count++;
         free(wlist[i].class);
@@ -179,15 +213,13 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
     }
 
     if (window_count == 0) {
-        printf("%%{F%s}", config.empty_desktop_fg_color);
-        printf(config.empty_desktop_string);
-        printf("%%{F-}");
+        print_polybar_str(config.empty_desktop_string, config.empty_desktop_fg_color, "", "", 0);
     }
 
     if (window_count > config.max_windows) {
-        printf("%%{F%s}", config.overflow_fg_color);
-        printf("(+%d)", window_count - config.max_windows);
-        printf("%%{F-}");
+        char label[20];
+        snprintf(label, 20, "(+%d)", window_count - config.max_windows);
+        print_polybar_str(label, config.overflow_fg_color, "", "", 0);
     }
 
     printf("\n");
