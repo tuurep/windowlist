@@ -127,10 +127,21 @@ All options are detailed here:
         </tr>
         <tr>
             <td><code>*_bg_color</code></td>
-            <td>All of the foreground colors have a background color counterpart, for example <code>active_window_bg_color</code></td>
+            <td>All of the foreground colors have a background color counterpart, e.g. <code>active_window_bg_color</code></td>
             <td>
                 <ul>
                     <li><code>"none"</code>: no background color</li>
+                    <li>hex color (string)</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td><code>*_ul_color</code></td>
+            <td>All colors also have an underline color counterpart, e.g. <code>active_window_ul_color</code><br><br>
+            Note that <code>line-size</code> must be set to 1 or higher in your polybar <code>config.ini</code>, otherwise underline isn't visible.</td>
+            <td>
+                <ul>
+                    <li><code>"none"</code>: no underline</li>
                     <li>hex color (string)</li>
                 </ul>
             </td>
