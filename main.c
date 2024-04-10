@@ -24,6 +24,12 @@ struct configuration {
     char empty_desktop_fg_color[20];
     char separator_fg_color[20];
     char overflow_fg_color[20];
+
+    char active_window_bg_color[20];
+    char inactive_window_bg_color[20];
+    char empty_desktop_bg_color[20];
+    char separator_bg_color[20];
+    char overflow_bg_color[20];
 } config;
 
 void copy_config_str(toml_table_t* tbl, char* option, char* config_field) {
@@ -65,6 +71,12 @@ void parse_config(char* filename, char* executable_path) {
     copy_config_str(tbl, "empty_desktop_fg_color", config.empty_desktop_fg_color);
     copy_config_str(tbl, "separator_fg_color", config.separator_fg_color);
     copy_config_str(tbl, "overflow_fg_color", config.overflow_fg_color);
+
+    copy_config_str(tbl, "active_window_bg_color", config.active_window_bg_color);
+    copy_config_str(tbl, "inactive_window_bg_color", config.inactive_window_bg_color);
+    copy_config_str(tbl, "empty_desktop_bg_color", config.empty_desktop_bg_color);
+    copy_config_str(tbl, "separator_bg_color", config.separator_bg_color);
+    copy_config_str(tbl, "overflow_bg_color", config.overflow_bg_color);
 
     toml_free(tbl);
 }
@@ -116,7 +128,7 @@ int unused(char* option) {
     return 0;
 }
 
-void print_polybar_str(char* label, char* fg_color, /* char* bg_color, */ /* char* ul_color, */
+void print_polybar_str(char* label, char* fg_color, char* bg_color, /* char* ul_color, */
                        char* l_click, /* char* m_click, */ char* r_click /* char* scroll_up, */ /* char* scroll_down, */) {
 
     int actions_count = 0;
@@ -131,9 +143,17 @@ void print_polybar_str(char* label, char* fg_color, /* char* bg_color, */ /* cha
         actions_count++;
     }
 
+    if (!unused(bg_color)) {
+        printf("%%{B%s}", bg_color);
+    }
+
     printf("%%{F%s}", fg_color);
     printf(label);
     printf("%%{F-}");
+
+    if (!unused(bg_color)) {
+        printf("%%{B-}");
+    }
 
     for (int i = 0; i < actions_count; i++) {
         printf("%%{A}");
@@ -158,7 +178,7 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
         }
 
         if (window_count > 0) {
-            print_polybar_str(config.separator_string, config.separator_fg_color, "", "");
+            print_polybar_str(config.separator_string, config.separator_fg_color, config.separator_bg_color, "", "");
         }
 
         Window wid = wlist[i].id;
@@ -169,13 +189,16 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
         snprintf(r_click, 200, "%s %s 0x%lx", executable_path, "--close", wid);
 
         char* window_fg_color;
+        char* window_bg_color;
 
         if (wid != active_window) {
             snprintf(l_click, 200, "%s %s 0x%lx", executable_path, "--raise", wid);
             window_fg_color = config.inactive_window_fg_color;
+            window_bg_color = config.inactive_window_bg_color;
         } else {
             snprintf(l_click, 200, "%s %s 0x%lx", executable_path, "--minimize", wid);
             window_fg_color = config.active_window_fg_color;
+            window_bg_color = config.active_window_bg_color;
         }
 
         char* window_name;
@@ -204,7 +227,7 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
 
         pad_spaces(window_name);
 
-        print_polybar_str(window_name, window_fg_color, l_click, r_click);
+        print_polybar_str(window_name, window_fg_color, window_bg_color, l_click, r_click);
 
         window_count++;
         free(window_name);
@@ -213,13 +236,13 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
     }
 
     if (window_count == 0) {
-        print_polybar_str(config.empty_desktop_string, config.empty_desktop_fg_color, "", "");
+        print_polybar_str(config.empty_desktop_string, config.empty_desktop_fg_color, config.empty_desktop_bg_color, "", "");
     }
 
     if (window_count > config.max_windows) {
         char label[20];
         snprintf(label, 20, "(+%d)", window_count - config.max_windows);
-        print_polybar_str(label, config.overflow_fg_color, "", "");
+        print_polybar_str(label, config.overflow_fg_color, config.overflow_bg_color, "", "");
     }
 
     printf("\n");
@@ -275,8 +298,8 @@ void spy_root_window(Display* d, char* executable_path) {
 Window str_to_wid(char* str) {
     unsigned long wid;
     if (sscanf(str, "0x%lx", &wid) != 1) {
-            fputs("Cannot convert argument to number.\n", stderr);
-            return EXIT_FAILURE;
+        fputs("Cannot convert argument to number.\n", stderr);
+        return EXIT_FAILURE;
     }
     return (Window) wid;
 }

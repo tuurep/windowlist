@@ -125,6 +125,16 @@ All options are detailed here:
             <td>Foreground color for the string that indicates max windows exceeding e.g. <code>(+3)</code></td>
             <td align="center">hex color (string)</td>
         </tr>
+        <tr>
+            <td><code>*_bg_color</code></td>
+            <td>All of the foreground colors have a background color counterpart, for example <code>active_window_bg_color</code></td>
+            <td>
+                <ul>
+                    <li><code>"none"</code>: no background color</li>
+                    <li>hex color (string)</li>
+                </ul>
+            </td>
+        </tr>
     </tbody>
 </table>
 
