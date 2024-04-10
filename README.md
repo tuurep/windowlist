@@ -86,6 +86,11 @@ All options are detailed here:
             <td align="center">number (int)</td>
         </tr>
         <tr>
+            <td><code>name_padding</code></td>
+            <td>How many spaces to add before and after a window name</td>
+            <td align="center">number (int)</td>
+        </tr>
+        <tr>
             <td><code>empty_desktop_string</code></td>
             <td>String to show when no windows are open</td>
             <td align="center">any string</td>
@@ -94,11 +99,6 @@ All options are detailed here:
             <td><code>separator_string</code></td>
             <td>String displayed between window names</td>
             <td align="center">any string</td>
-        </tr>
-        <tr>
-            <td><code>spaces</code></td>
-            <td>How many spaces to add between window name and separator. Note that this space is part of the clickable area for a window name.</td>
-            <td align="center">number (int)</td>
         </tr>
         <tr>
             <td><code>active_window_fg_color</code></td>

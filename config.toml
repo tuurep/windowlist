@@ -4,10 +4,10 @@ max_windows = 13
 name = "class" # "class" | "title"
 name_case = "lowercase" # "none" | "lowercase" | "uppercase"
 name_max_length = 30
+name_padding = 1
 
 empty_desktop_string = ""
 separator_string = "·"
-spaces = 1
 
 active_window_fg_color = "#e0e0e0"
 inactive_window_fg_color = "#808080"

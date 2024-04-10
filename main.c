@@ -14,10 +14,10 @@ struct configuration {
     char name[20];
     char name_case[20];
     int name_max_length;
+    int name_padding;
 
     char empty_desktop_string[200];
     char separator_string[200];
-    int spaces;
 
     char active_window_fg_color[20];
     char inactive_window_fg_color[20];
@@ -55,10 +55,10 @@ void parse_config(char* filename, char* executable_path) {
     copy_config_str(tbl, "name", config.name);
     copy_config_str(tbl, "name_case", config.name_case);
     config.name_max_length = toml_table_int(tbl, "name_max_length").u.i;
+    config.name_padding = toml_table_int(tbl, "name_padding").u.i;
 
     copy_config_str(tbl, "empty_desktop_string", config.empty_desktop_string);
     copy_config_str(tbl, "separator_string", config.separator_string);
-    config.spaces = toml_table_int(tbl, "spaces").u.i;
 
     copy_config_str(tbl, "active_window_fg_color", config.active_window_fg_color);
     copy_config_str(tbl, "inactive_window_fg_color", config.inactive_window_fg_color);
@@ -101,10 +101,13 @@ int compare_position(const void* v1, const void* v2) {
     return 0;
 }
 
-void print_spaces() {
-    for (int i = 0; i < config.spaces; i++) {
-        printf(" ");
-    }
+void pad_spaces(char* window_name) {
+    int n = config.name_padding;
+    window_name = realloc(window_name, (strlen(window_name) + n * 2) * sizeof(char));
+    size_t original_length = strlen(window_name);
+    memmove(window_name + n, window_name, original_length + 1);
+    memset(window_name, ' ', n);
+    memset(window_name + n + original_length, ' ', n);
 }
 
 int unused(char* option) {
@@ -115,8 +118,7 @@ int unused(char* option) {
 }
 
 void print_polybar_str(char* label, char* fg_color, /* char* bg_color, */ /* char* ul_color, */
-                       char* l_click, /* char* m_click, */ char* r_click, /* char* scroll_up, */ /* char* scroll_down, */
-                       int should_print_spaces) {
+                       char* l_click, /* char* m_click, */ char* r_click /* char* scroll_up, */ /* char* scroll_down, */) {
 
     int actions_count = 0;
 
@@ -130,18 +132,10 @@ void print_polybar_str(char* label, char* fg_color, /* char* bg_color, */ /* cha
         actions_count++;
     }
 
-    if (should_print_spaces) {
-        print_spaces();
-    }
-
     printf("%%{F%s}", fg_color);
     printf(label);
     printf("%%{F-}");
 
-    if (should_print_spaces) {
-        print_spaces();
-    }
-    
     for (int i = 0; i < actions_count; i++) {
         printf("%%{A}");
     }
@@ -165,7 +159,7 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
         }
 
         if (window_count > 0) {
-            print_polybar_str(config.separator_string, config.separator_fg_color, "", "", 0);
+            print_polybar_str(config.separator_string, config.separator_fg_color, "", "");
         }
 
         Window wid = wlist[i].id;
@@ -205,7 +199,9 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
             uppercase(window_name);
         }
 
-        print_polybar_str(window_name, window_fg_color, l_click, r_click, 1);
+        pad_spaces(window_name);
+
+        print_polybar_str(window_name, window_fg_color, l_click, r_click);
 
         window_count++;
         free(wlist[i].class);
@@ -213,13 +209,13 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
     }
 
     if (window_count == 0) {
-        print_polybar_str(config.empty_desktop_string, config.empty_desktop_fg_color, "", "", 0);
+        print_polybar_str(config.empty_desktop_string, config.empty_desktop_fg_color, "", "");
     }
 
     if (window_count > config.max_windows) {
         char label[20];
         snprintf(label, 20, "(+%d)", window_count - config.max_windows);
-        print_polybar_str(label, config.overflow_fg_color, "", "", 0);
+        print_polybar_str(label, config.overflow_fg_color, "", "");
     }
 
     printf("\n");
