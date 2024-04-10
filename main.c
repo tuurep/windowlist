@@ -103,7 +103,6 @@ int compare_position(const void* v1, const void* v2) {
 
 void pad_spaces(char* window_name) {
     int n = config.name_padding;
-    window_name = realloc(window_name, (strlen(window_name) + n * 2) * sizeof(char));
     size_t original_length = strlen(window_name);
     memmove(window_name + n, window_name, original_length + 1);
     memset(window_name, ' ', n);
@@ -182,9 +181,13 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
         char* window_name;
 
         if (!strcmp(config.name, "title")) {
-            window_name = wlist[i].title;
+            char* title = wlist[i].title;
+            window_name = malloc(strlen(title)+1 + (config.name_padding * 2) * sizeof(char));
+            strcpy(window_name, title);
         } else {
-            window_name = wlist[i].class;
+            char* class = wlist[i].class;
+            window_name = malloc(strlen(class)+1 + (config.name_padding * 2) * sizeof(char));
+            strcpy(window_name, class);
         }
 
         if (strlen(window_name) > config.name_max_length) {
@@ -204,6 +207,7 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
         print_polybar_str(window_name, window_fg_color, l_click, r_click);
 
         window_count++;
+        free(window_name);
         free(wlist[i].class);
         free(wlist[i].title);
     }
