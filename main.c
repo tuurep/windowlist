@@ -7,53 +7,47 @@
 #include "toml-c.h"
 #include "windowlist.h"
 
+#define MAX_STR_LEN 200
+
 struct configuration {
-    char sort_by[20];
+    char* sort_by;
     int max_windows;
 
-    char name[20];
-    char name_case[20];
+    char* name;
+    char* name_case;
     int name_max_length;
     int name_padding;
 
-    char empty_desktop_string[200];
-    char separator_string[200];
+    char* empty_desktop_string;
+    char* separator_string;
 
-    char active_window_fg_color[20];
-    char inactive_window_fg_color[20];
-    char empty_desktop_fg_color[20];
-    char separator_fg_color[20];
-    char overflow_fg_color[20];
+    char* active_window_fg_color;
+    char* inactive_window_fg_color;
+    char* empty_desktop_fg_color;
+    char* separator_fg_color;
+    char* overflow_fg_color;
 
-    char active_window_bg_color[20];
-    char inactive_window_bg_color[20];
-    char empty_desktop_bg_color[20];
-    char separator_bg_color[20];
-    char overflow_bg_color[20];
+    char* active_window_bg_color;
+    char* inactive_window_bg_color;
+    char* empty_desktop_bg_color;
+    char* separator_bg_color;
+    char* overflow_bg_color;
 
-    char active_window_ul_color[20];
-    char inactive_window_ul_color[20];
-    char empty_desktop_ul_color[20];
-    char separator_ul_color[20];
-    char overflow_ul_color[20];
+    char* active_window_ul_color;
+    char* inactive_window_ul_color;
+    char* empty_desktop_ul_color;
+    char* separator_ul_color;
+    char* overflow_ul_color;
 } config;
 
-void copy_config_str(toml_table_t* tbl, char* option, char* config_field) {
-    // Helper function to do a repetitive free operation
-    char* toml_ptr = toml_table_string(tbl, option).u.s;
-    strcpy(config_field, toml_ptr);
-    free(toml_ptr);
-}
-
-void parse_config(char* filename, char* executable_path) {
-    int max_path_length = 200;
-    char config_path[max_path_length];
+toml_table_t* parse_config(char* filename, char* executable_path) {
+    char config_path[MAX_STR_LEN];
 
     // create path to config file relative to the executable
     char* dir = dirname(STRDUP(executable_path)); // without dup, argv[0] gets modified by dirname()
-    snprintf(config_path, max_path_length, "%s/%s", dir, filename);
+    snprintf(config_path, MAX_STR_LEN, "%s/%s", dir, filename);
 
-    char errbuf[200];
+    char errbuf[MAX_STR_LEN];
 
     FILE* fp = fopen(config_path, "r");
     toml_table_t* tbl = toml_parse_file(fp, errbuf, sizeof(errbuf));
@@ -61,36 +55,36 @@ void parse_config(char* filename, char* executable_path) {
 
     free(dir);
 
-    copy_config_str(tbl, "sort_by", config.sort_by);
+    config.sort_by = toml_table_string(tbl, "sort_by").u.s;
     config.max_windows = toml_table_int(tbl, "max_windows").u.i;
 
-    copy_config_str(tbl, "name", config.name);
-    copy_config_str(tbl, "name_case", config.name_case);
+    config.name = toml_table_string(tbl, "name").u.s;
+    config.name_case = toml_table_string(tbl, "name_case").u.s;
     config.name_max_length = toml_table_int(tbl, "name_max_length").u.i;
     config.name_padding = toml_table_int(tbl, "name_padding").u.i;
 
-    copy_config_str(tbl, "empty_desktop_string", config.empty_desktop_string);
-    copy_config_str(tbl, "separator_string", config.separator_string);
+    config.empty_desktop_string = toml_table_string(tbl, "empty_desktop_string").u.s;
+    config.separator_string = toml_table_string(tbl, "separator_string").u.s;
 
-    copy_config_str(tbl, "active_window_fg_color", config.active_window_fg_color);
-    copy_config_str(tbl, "inactive_window_fg_color", config.inactive_window_fg_color);
-    copy_config_str(tbl, "empty_desktop_fg_color", config.empty_desktop_fg_color);
-    copy_config_str(tbl, "separator_fg_color", config.separator_fg_color);
-    copy_config_str(tbl, "overflow_fg_color", config.overflow_fg_color);
+    config.active_window_fg_color = toml_table_string(tbl, "active_window_fg_color").u.s;
+    config.inactive_window_fg_color = toml_table_string(tbl, "inactive_window_fg_color").u.s;
+    config.empty_desktop_fg_color = toml_table_string(tbl, "empty_desktop_fg_color").u.s;
+    config.separator_fg_color = toml_table_string(tbl, "separator_fg_color").u.s;
+    config.overflow_fg_color = toml_table_string(tbl, "overflow_fg_color").u.s;
 
-    copy_config_str(tbl, "active_window_bg_color", config.active_window_bg_color);
-    copy_config_str(tbl, "inactive_window_bg_color", config.inactive_window_bg_color);
-    copy_config_str(tbl, "empty_desktop_bg_color", config.empty_desktop_bg_color);
-    copy_config_str(tbl, "separator_bg_color", config.separator_bg_color);
-    copy_config_str(tbl, "overflow_bg_color", config.overflow_bg_color);
+    config.active_window_bg_color = toml_table_string(tbl, "active_window_bg_color").u.s;
+    config.inactive_window_bg_color = toml_table_string(tbl, "inactive_window_bg_color").u.s;
+    config.empty_desktop_bg_color = toml_table_string(tbl, "empty_desktop_bg_color").u.s;
+    config.separator_bg_color = toml_table_string(tbl, "separator_bg_color").u.s;
+    config.overflow_bg_color = toml_table_string(tbl, "overflow_bg_color").u.s;
 
-    copy_config_str(tbl, "active_window_ul_color", config.active_window_ul_color);
-    copy_config_str(tbl, "inactive_window_ul_color", config.inactive_window_ul_color);
-    copy_config_str(tbl, "empty_desktop_ul_color", config.empty_desktop_ul_color);
-    copy_config_str(tbl, "separator_ul_color", config.separator_ul_color);
-    copy_config_str(tbl, "overflow_ul_color", config.overflow_ul_color);
+    config.active_window_ul_color = toml_table_string(tbl, "active_window_ul_color").u.s;
+    config.inactive_window_ul_color = toml_table_string(tbl, "inactive_window_ul_color").u.s;
+    config.empty_desktop_ul_color = toml_table_string(tbl, "empty_desktop_ul_color").u.s;
+    config.separator_ul_color = toml_table_string(tbl, "separator_ul_color").u.s;
+    config.overflow_ul_color = toml_table_string(tbl, "overflow_ul_color").u.s;
 
-    toml_free(tbl);
+    return tbl;
 }
 
 void lowercase(char* str) {
@@ -203,22 +197,22 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
 
         Window wid = wlist[i].id;
 
-        char window_l_click[200];
-        char window_r_click[200];
+        char window_l_click[MAX_STR_LEN];
+        char window_r_click[MAX_STR_LEN];
 
-        snprintf(window_r_click, 200, "%s %s 0x%lx", executable_path, "--close", wid);
+        snprintf(window_r_click, MAX_STR_LEN, "%s %s 0x%lx", executable_path, "--close", wid);
 
         char* window_fg_color;
         char* window_bg_color;
         char* window_ul_color;
 
         if (wid != active_window) {
-            snprintf(window_l_click, 200, "%s %s 0x%lx", executable_path, "--raise", wid);
+            snprintf(window_l_click, MAX_STR_LEN, "%s %s 0x%lx", executable_path, "--raise", wid);
             window_fg_color = config.inactive_window_fg_color;
             window_bg_color = config.inactive_window_bg_color;
             window_ul_color = config.inactive_window_ul_color;
         } else {
-            snprintf(window_l_click, 200, "%s %s 0x%lx", executable_path, "--minimize", wid);
+            snprintf(window_l_click, MAX_STR_LEN, "%s %s 0x%lx", executable_path, "--minimize", wid);
             window_fg_color = config.active_window_fg_color;
             window_bg_color = config.active_window_bg_color;
             window_ul_color = config.active_window_ul_color;
@@ -328,8 +322,8 @@ Window str_to_wid(char* str) {
 }
 
 int main(int argc, char* argv[]) {
-    parse_config("config.toml", argv[0]);
     Display* d = XOpenDisplay(NULL);
+    toml_table_t* tbl = parse_config("config.toml", argv[0]);
 
     if (argc < 2) {
         // No arguments: listen to XEvents forever
@@ -350,5 +344,7 @@ int main(int argc, char* argv[]) {
             minimize_window(d, wid);
         }
     }
+
     XCloseDisplay(d);
+    toml_free(tbl);
 }
