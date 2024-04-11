@@ -310,6 +310,7 @@ void spy_root_window(Display* d, char* executable_path) {
             prev_wlist_len = n;
         }
     }
+    free(prev_wlist);
 }
 
 Window str_to_wid(char* str) {
