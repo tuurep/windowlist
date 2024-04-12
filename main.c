@@ -150,6 +150,18 @@ bool is_ignored(char* class) {
     return false;
 }
 
+char* get_window_nickname(char* class, char* title) {
+    for (int i = 0; i < toml_table_len(config.window_nicknames); i++) {
+        int keylen;
+        const char* key = toml_table_key(config.window_nicknames, i, &keylen);
+        if (!strcasecmp(key, class) || !strcasecmp(key, title)) {
+            char* nickname = toml_table_string(config.window_nicknames, key).u.s;
+            return nickname;
+        }
+    }
+    return NULL;
+}
+
 void print_polybar_str(char* label, char* fg_color, char* bg_color, char* ul_color,
                        char* l_click, /* char* m_click, */ char* r_click /* char* scroll_up, */ /* char* scroll_down */) {
 
@@ -240,14 +252,16 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
             window_ul_color = config.active_window_ul_color;
         }
 
-        char* window_name;
-
-        if (!strcmp(config.name, "title")) {
-            window_name = malloc(strlen(title)+1 + (config.name_padding * 2) * sizeof(char));
-            strcpy(window_name, title);
-        } else {
-            window_name = malloc(strlen(class)+1 + (config.name_padding * 2) * sizeof(char));
-            strcpy(window_name, class);
+        char* window_name = get_window_nickname(class, title);
+        
+        if (!window_name) {
+            if (!strcmp(config.name, "title")) {
+                window_name = malloc(strlen(title)+1 + (config.name_padding * 2) * sizeof(char));
+                strcpy(window_name, title);
+            } else {
+                window_name = malloc(strlen(class)+1 + (config.name_padding * 2) * sizeof(char));
+                strcpy(window_name, class);
+            }
         }
 
         if (strlen(window_name) > config.name_max_length) {
