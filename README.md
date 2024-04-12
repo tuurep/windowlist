@@ -12,6 +12,8 @@ Windowlist has been fully rewritten in C using the relevant parts of the source 
 * Option to sort the window list:
     * By horizontal position on the screen
     * By the application name
+* Ability to set nicknames for windows if a window has a bad default name
+* More flexible styling
 
 ## Installation
 
