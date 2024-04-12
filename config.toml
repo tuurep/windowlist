@@ -26,3 +26,12 @@ inactive_window_ul_color = "none"
 empty_desktop_ul_color = "none"
 separator_ul_color = "none"
 overflow_ul_color = "none"
+
+ignored_classes = [
+    # "foo",
+    # "bar"
+]
+
+[window_nicknames]
+# foo = "bar"
+# baz = "qux"
