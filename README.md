@@ -146,6 +146,16 @@ All options are detailed here:
                 </ul>
             </td>
         </tr>
+        <tr>
+            <td><code>ignored_classes</code></td>
+            <td>Windows with a WM_CLASS in this array will not be shown on the bar. Strings are matched case insensitively.</td>
+            <td align="center">array of strings</td>
+        </tr>
+        <tr>
+            <td><code>window_nicknames</code></td>
+            <td>A window name can be substituted with a custom name using key value pairs. The keys are matched case insensitively.</td>
+            <td align="center">table of string key-value pairs</td>
+        </tr>
     </tbody>
 </table>
 

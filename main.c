@@ -38,6 +38,9 @@ struct configuration {
     char* empty_desktop_ul_color;
     char* separator_ul_color;
     char* overflow_ul_color;
+
+    toml_array_t* ignored_classes;
+    toml_table_t* window_nicknames;
 } config;
 
 toml_table_t* parse_config(char* filename, char* executable_path) {
@@ -84,6 +87,9 @@ toml_table_t* parse_config(char* filename, char* executable_path) {
     config.separator_ul_color = toml_table_string(tbl, "separator_ul_color").u.s;
     config.overflow_ul_color = toml_table_string(tbl, "overflow_ul_color").u.s;
 
+    config.ignored_classes = toml_table_array(tbl, "ignored_classes");
+    config.window_nicknames = toml_table_table(tbl, "window_nicknames");
+
     return tbl;
 }
 
@@ -127,11 +133,33 @@ void pad_spaces(char* window_name) {
     memset(window_name + n + original_length, ' ', n);
 }
 
-int unused(char* option) {
+bool is_unused(char* option) {
     if (option[0] == '\0' || !strcmp(option, "none")) {
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
+}
+
+bool is_ignored(char* class) {
+    for (int i = 0; i < toml_array_len(config.ignored_classes); i++) {
+        char* ignored_class = toml_array_string(config.ignored_classes, i).u.s;
+        if (!strcasecmp(class, ignored_class)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+char* get_window_nickname(char* class, char* title) {
+    for (int i = 0; i < toml_table_len(config.window_nicknames); i++) {
+        int keylen;
+        const char* key = toml_table_key(config.window_nicknames, i, &keylen);
+        if (!strcasecmp(key, class) || !strcasecmp(key, title)) {
+            char* nickname = toml_table_string(config.window_nicknames, key).u.s;
+            return nickname;
+        }
+    }
+    return NULL;
 }
 
 void print_polybar_str(char* label, char* fg_color, char* bg_color, char* ul_color,
@@ -139,21 +167,21 @@ void print_polybar_str(char* label, char* fg_color, char* bg_color, char* ul_col
 
     int actions_count = 0;
 
-    if (!unused(l_click)) {
+    if (!is_unused(l_click)) {
         printf("%%{A1:%s:}", l_click);
         actions_count++;
     }
 
-    if (!unused(r_click)) {
+    if (!is_unused(r_click)) {
         printf("%%{A3:%s:}", r_click);
         actions_count++;
     }
 
-    if (!unused(bg_color)) {
+    if (!is_unused(bg_color)) {
         printf("%%{B%s}", bg_color);
     }
 
-    if (!unused(ul_color)) {
+    if (!is_unused(ul_color)) {
         printf("%%{u%s}%%{+u}", ul_color);
     }
 
@@ -161,11 +189,11 @@ void print_polybar_str(char* label, char* fg_color, char* bg_color, char* ul_col
     printf(label);
     printf("%%{F-}");
 
-    if (!unused(ul_color)) {
+    if (!is_unused(ul_color)) {
         printf("%%{-u}");
     }
 
-    if (!unused(bg_color)) {
+    if (!is_unused(bg_color)) {
         printf("%%{B-}");
     }
 
@@ -191,11 +219,17 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
             continue;
         }
 
+        char* class = wlist[i].class;
+        char* title = wlist[i].title;
+        Window wid = wlist[i].id;
+
+        if (is_ignored(class)) {
+            continue;
+        }
+
         if (window_count > 0) {
             print_polybar_str(config.separator_string, config.separator_fg_color, config.separator_bg_color, config.separator_ul_color, "", "");
         }
-
-        Window wid = wlist[i].id;
 
         char window_l_click[MAX_STR_LEN];
         char window_r_click[MAX_STR_LEN];
@@ -218,16 +252,16 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
             window_ul_color = config.active_window_ul_color;
         }
 
-        char* window_name;
-
-        if (!strcmp(config.name, "title")) {
-            char* title = wlist[i].title;
-            window_name = malloc(strlen(title)+1 + (config.name_padding * 2) * sizeof(char));
-            strcpy(window_name, title);
-        } else {
-            char* class = wlist[i].class;
-            window_name = malloc(strlen(class)+1 + (config.name_padding * 2) * sizeof(char));
-            strcpy(window_name, class);
+        char* window_name = get_window_nickname(class, title);
+        
+        if (!window_name) {
+            if (!strcmp(config.name, "title")) {
+                window_name = malloc(strlen(title)+1 + (config.name_padding * 2) * sizeof(char));
+                strcpy(window_name, title);
+            } else {
+                window_name = malloc(strlen(class)+1 + (config.name_padding * 2) * sizeof(char));
+                strcpy(window_name, class);
+            }
         }
 
         if (strlen(window_name) > config.name_max_length) {
