@@ -153,10 +153,20 @@ bool is_ignored(char* class) {
 char* get_window_nickname(char* class, char* title) {
     for (int i = 0; i < toml_table_len(config.window_nicknames); i++) {
         int keylen;
+
         const char* key = toml_table_key(config.window_nicknames, i, &keylen);
-        if (!strcasecmp(key, class) || !strcasecmp(key, title)) {
-            char* nickname = toml_table_string(config.window_nicknames, key).u.s;
-            return nickname;
+        char* val;
+
+        if (!strcmp(config.name, "title")) {
+            if (!strcasecmp(key, title)) {
+                val = toml_table_string(config.window_nicknames, key).u.s;
+                return val;
+            }
+        } else {
+            if (!strcasecmp(key, class)) {
+                val = toml_table_string(config.window_nicknames, key).u.s;
+                return val;
+            }
         }
     }
     return NULL;
