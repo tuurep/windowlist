@@ -21,42 +21,51 @@ struct configuration {
     char* empty_desktop_string;
     char* separator_string;
 
+    char* active_window_left_click;
+    char* active_window_middle_click;
+    char* active_window_right_click;
+    char* active_window_scroll_up;
+    char* active_window_scroll_down;
+
+    char* inactive_window_left_click;
+    char* inactive_window_middle_click;
+    char* inactive_window_right_click;
+    char* inactive_window_scroll_up;
+    char* inactive_window_scroll_down;
+
     char* active_window_fg_color;
-    char* inactive_window_fg_color;
-    char* empty_desktop_fg_color;
-    char* separator_fg_color;
-    char* overflow_fg_color;
-
     char* active_window_bg_color;
-    char* inactive_window_bg_color;
-    char* empty_desktop_bg_color;
-    char* separator_bg_color;
-    char* overflow_bg_color;
-
     char* active_window_ul_color;
+
+    char* inactive_window_fg_color;
+    char* inactive_window_bg_color;
     char* inactive_window_ul_color;
-    char* empty_desktop_ul_color;
+
+    char* separator_fg_color;
+    char* separator_bg_color;
     char* separator_ul_color;
+
+    char* empty_desktop_fg_color;
+    char* empty_desktop_bg_color;
+    char* empty_desktop_ul_color;
+
+    char* overflow_fg_color;
+    char* overflow_bg_color;
     char* overflow_ul_color;
 
     toml_array_t* ignored_classes;
     toml_table_t* window_nicknames;
 } config;
 
-toml_table_t* parse_config(char* filename, char* executable_path) {
+toml_table_t* parse_config(char* filename, char* path) {
     char config_path[MAX_STR_LEN];
-
-    // create path to config file relative to the executable
-    char* dir = dirname(STRDUP(executable_path)); // without dup, argv[0] gets modified by dirname()
-    snprintf(config_path, MAX_STR_LEN, "%s/%s", dir, filename);
+    snprintf(config_path, MAX_STR_LEN, "%s/%s", path, filename);
 
     char errbuf[MAX_STR_LEN];
 
     FILE* fp = fopen(config_path, "r");
     toml_table_t* tbl = toml_parse_file(fp, errbuf, sizeof(errbuf));
     fclose(fp);
-
-    free(dir);
 
     config.sort_by = toml_table_string(tbl, "sort_by").u.s;
     config.max_windows = toml_table_int(tbl, "max_windows").u.i;
@@ -69,22 +78,36 @@ toml_table_t* parse_config(char* filename, char* executable_path) {
     config.empty_desktop_string = toml_table_string(tbl, "empty_desktop_string").u.s;
     config.separator_string = toml_table_string(tbl, "separator_string").u.s;
 
+    config.active_window_left_click = toml_table_string(tbl, "active_window_left_click").u.s;
+    config.active_window_middle_click = toml_table_string(tbl, "active_window_middle_click").u.s;
+    config.active_window_right_click = toml_table_string(tbl, "active_window_right_click").u.s;
+    config.active_window_scroll_up = toml_table_string(tbl, "active_window_scroll_up").u.s;
+    config.active_window_scroll_down = toml_table_string(tbl, "active_window_scroll_down").u.s;
+
+    config.inactive_window_left_click = toml_table_string(tbl, "inactive_window_left_click").u.s;
+    config.inactive_window_middle_click = toml_table_string(tbl, "inactive_window_middle_click").u.s;
+    config.inactive_window_right_click = toml_table_string(tbl, "inactive_window_right_click").u.s;
+    config.inactive_window_scroll_up = toml_table_string(tbl, "inactive_window_scroll_up").u.s;
+    config.inactive_window_scroll_down = toml_table_string(tbl, "inactive_window_scroll_down").u.s;
+
     config.active_window_fg_color = toml_table_string(tbl, "active_window_fg_color").u.s;
-    config.inactive_window_fg_color = toml_table_string(tbl, "inactive_window_fg_color").u.s;
-    config.empty_desktop_fg_color = toml_table_string(tbl, "empty_desktop_fg_color").u.s;
-    config.separator_fg_color = toml_table_string(tbl, "separator_fg_color").u.s;
-    config.overflow_fg_color = toml_table_string(tbl, "overflow_fg_color").u.s;
-
     config.active_window_bg_color = toml_table_string(tbl, "active_window_bg_color").u.s;
-    config.inactive_window_bg_color = toml_table_string(tbl, "inactive_window_bg_color").u.s;
-    config.empty_desktop_bg_color = toml_table_string(tbl, "empty_desktop_bg_color").u.s;
-    config.separator_bg_color = toml_table_string(tbl, "separator_bg_color").u.s;
-    config.overflow_bg_color = toml_table_string(tbl, "overflow_bg_color").u.s;
-
     config.active_window_ul_color = toml_table_string(tbl, "active_window_ul_color").u.s;
+
+    config.inactive_window_fg_color = toml_table_string(tbl, "inactive_window_fg_color").u.s;
+    config.inactive_window_bg_color = toml_table_string(tbl, "inactive_window_bg_color").u.s;
     config.inactive_window_ul_color = toml_table_string(tbl, "inactive_window_ul_color").u.s;
-    config.empty_desktop_ul_color = toml_table_string(tbl, "empty_desktop_ul_color").u.s;
+
+    config.separator_fg_color = toml_table_string(tbl, "separator_fg_color").u.s;
+    config.separator_bg_color = toml_table_string(tbl, "separator_bg_color").u.s;
     config.separator_ul_color = toml_table_string(tbl, "separator_ul_color").u.s;
+
+    config.empty_desktop_fg_color = toml_table_string(tbl, "empty_desktop_fg_color").u.s;
+    config.empty_desktop_bg_color = toml_table_string(tbl, "empty_desktop_bg_color").u.s;
+    config.empty_desktop_ul_color = toml_table_string(tbl, "empty_desktop_ul_color").u.s;
+
+    config.overflow_fg_color = toml_table_string(tbl, "overflow_fg_color").u.s;
+    config.overflow_bg_color = toml_table_string(tbl, "overflow_bg_color").u.s;
     config.overflow_ul_color = toml_table_string(tbl, "overflow_ul_color").u.s;
 
     config.ignored_classes = toml_table_array(tbl, "ignored_classes");
@@ -173,7 +196,7 @@ char* get_window_nickname(char* class, char* title) {
 }
 
 void print_polybar_str(char* label, char* fg_color, char* bg_color, char* ul_color,
-                       char* l_click, /* char* m_click, */ char* r_click /* char* scroll_up, */ /* char* scroll_down */) {
+                       char* l_click, char* m_click, char* r_click, char* scroll_up, char* scroll_down) {
 
     int actions_count = 0;
 
@@ -182,8 +205,23 @@ void print_polybar_str(char* label, char* fg_color, char* bg_color, char* ul_col
         actions_count++;
     }
 
+    if (!is_unused(m_click)) {
+        printf("%%{A2:%s:}", m_click);
+        actions_count++;
+    }
+
     if (!is_unused(r_click)) {
         printf("%%{A3:%s:}", r_click);
+        actions_count++;
+    }
+
+    if (!is_unused(scroll_up)) {
+        printf("%%{A4:%s:}", scroll_up);
+        actions_count++;
+    }
+
+    if (!is_unused(scroll_down)) {
+        printf("%%{A5:%s:}", scroll_down);
         actions_count++;
     }
 
@@ -212,7 +250,7 @@ void print_polybar_str(char* label, char* fg_color, char* bg_color, char* ul_col
     }
 }
 
-void output(struct window_props* wlist, int n, Window active_window, char* executable_path) {
+void output(struct window_props* wlist, int n, Window active_window, char* path) {
 
     if (!strcmp(config.sort_by, "application")) {
         qsort(wlist, n, sizeof(struct window_props), compare_window_class);
@@ -238,25 +276,35 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
         }
 
         if (window_count > 0) {
-            print_polybar_str(config.separator_string, config.separator_fg_color, config.separator_bg_color, config.separator_ul_color, "", "");
+            print_polybar_str(config.separator_string, config.separator_fg_color, config.separator_bg_color, config.separator_ul_color,
+                              "none", "none", "none", "none", "none");
         }
 
-        char window_l_click[MAX_STR_LEN];
-        char window_r_click[MAX_STR_LEN];
-
-        snprintf(window_r_click, MAX_STR_LEN, "%s %s 0x%lx", executable_path, "--close", wid);
+        char window_left_click  [MAX_STR_LEN];
+        char window_middle_click[MAX_STR_LEN];
+        char window_right_click [MAX_STR_LEN];
+        char window_scroll_up   [MAX_STR_LEN];
+        char window_scroll_down [MAX_STR_LEN];
 
         char* window_fg_color;
         char* window_bg_color;
         char* window_ul_color;
 
         if (wid != active_window) {
-            snprintf(window_l_click, MAX_STR_LEN, "%s %s 0x%lx", executable_path, "--raise", wid);
+            snprintf(window_left_click,   MAX_STR_LEN, "sh %s/click-actions/%s 0x%lx", path, config.inactive_window_left_click,   wid);
+            snprintf(window_middle_click, MAX_STR_LEN, "sh %s/click-actions/%s 0x%lx", path, config.inactive_window_middle_click, wid);
+            snprintf(window_right_click,  MAX_STR_LEN, "sh %s/click-actions/%s 0x%lx", path, config.inactive_window_right_click,  wid);
+            snprintf(window_scroll_up,    MAX_STR_LEN, "sh %s/click-actions/%s 0x%lx", path, config.inactive_window_scroll_up,    wid);
+            snprintf(window_scroll_down,  MAX_STR_LEN, "sh %s/click-actions/%s 0x%lx", path, config.inactive_window_scroll_down,  wid);
             window_fg_color = config.inactive_window_fg_color;
             window_bg_color = config.inactive_window_bg_color;
             window_ul_color = config.inactive_window_ul_color;
         } else {
-            snprintf(window_l_click, MAX_STR_LEN, "%s %s 0x%lx", executable_path, "--minimize", wid);
+            snprintf(window_left_click,   MAX_STR_LEN, "sh %s/click-actions/%s 0x%lx", path, config.active_window_left_click,   wid);
+            snprintf(window_middle_click, MAX_STR_LEN, "sh %s/click-actions/%s 0x%lx", path, config.active_window_middle_click, wid);
+            snprintf(window_right_click,  MAX_STR_LEN, "sh %s/click-actions/%s 0x%lx", path, config.active_window_right_click,  wid);
+            snprintf(window_scroll_up,    MAX_STR_LEN, "sh %s/click-actions/%s 0x%lx", path, config.active_window_scroll_up,    wid);
+            snprintf(window_scroll_down,  MAX_STR_LEN, "sh %s/click-actions/%s 0x%lx", path, config.active_window_scroll_down,  wid);
             window_fg_color = config.active_window_fg_color;
             window_bg_color = config.active_window_bg_color;
             window_ul_color = config.active_window_ul_color;
@@ -288,7 +336,9 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
 
         pad_spaces(window_name);
 
-        print_polybar_str(window_name, window_fg_color, window_bg_color, window_ul_color, window_l_click, window_r_click);
+        print_polybar_str(window_name, window_fg_color, window_bg_color, window_ul_color,
+                          window_left_click, window_middle_click, window_right_click,
+                          window_scroll_up, window_scroll_down);
 
         window_count++;
         free(window_name);
@@ -297,13 +347,15 @@ void output(struct window_props* wlist, int n, Window active_window, char* execu
     }
 
     if (window_count == 0) {
-        print_polybar_str(config.empty_desktop_string, config.empty_desktop_fg_color, config.empty_desktop_bg_color, config.empty_desktop_ul_color, "", "");
+        print_polybar_str(config.empty_desktop_string, config.empty_desktop_fg_color, config.empty_desktop_bg_color, config.empty_desktop_ul_color,
+                          "none", "none", "none", "none", "none");
     }
 
     if (window_count > config.max_windows) {
-        char label[20];
-        snprintf(label, 20, "(+%d)", window_count - config.max_windows);
-        print_polybar_str(label, config.overflow_fg_color, config.overflow_bg_color, config.overflow_ul_color, "", "");
+        char overflow_string[20];
+        snprintf(overflow_string, 20, "(+%d)", window_count - config.max_windows);
+        print_polybar_str(overflow_string, config.overflow_fg_color, config.overflow_bg_color, config.overflow_ul_color,
+                          "none", "none", "none", "none", "none");
     }
 
     printf("\n");
@@ -324,7 +376,7 @@ void configure_windows_notify(Display* d, struct window_props* prev_wlist, int p
     }
 }
 
-void spy_root_window(Display* d, char* executable_path) {
+void spy_root_window(Display* d, char* path) {
     XEvent e;
     Window root = DefaultRootWindow(d);
 
@@ -347,7 +399,7 @@ void spy_root_window(Display* d, char* executable_path) {
             int n;
             struct window_props* wlist = generate_window_list(d, current_desktop_id, &n);
             configure_windows_notify(d, prev_wlist, prev_wlist_len, wlist, n);
-            output(wlist, n, active_window, executable_path);
+            output(wlist, n, active_window, path);
 
             free(prev_wlist);
             prev_wlist = wlist;
@@ -367,13 +419,15 @@ Window str_to_wid(char* str) {
 }
 
 int main(int argc, char* argv[]) {
+    char* path = dirname(argv[0]);
+
     Display* d = XOpenDisplay(NULL);
-    toml_table_t* tbl = parse_config("config.toml", argv[0]);
+    toml_table_t* tbl = parse_config("config.toml", path);
 
     if (argc < 2) {
         // No arguments: listen to XEvents forever
         // and print the window list (output to stdout)
-        spy_root_window(d, argv[0]);
+        spy_root_window(d, path);
     } else {
         // Arguments exist: handle on-click action
         char* action = argv[1];
