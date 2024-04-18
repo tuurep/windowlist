@@ -116,7 +116,7 @@ All options are detailed below:
                 <code>inactive_window_scroll_up</code><br>
                 <code>inactive_window_scroll_down</code><br>
             </td>
-            <td>Click actions for window names can be set as shell scripts. Window currently in focus (active) and unfocused windows (inactive) are configurable separately.</td>
+            <td>Click actions for window names can be set as <code>"raise"</code>, <code>"minimize"</code> or <code>"close"</code>, or a custom script/program in the <code>click-actions</code> directory. Window currently in focus (active) and unfocused windows (inactive) are configurable separately.</td>
             <td>
                 <ul>
                     <li><code>"none"</code>: no action</li>
