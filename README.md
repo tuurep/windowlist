@@ -187,18 +187,11 @@ Note: polybar must be reset before changes take effect.
 
 ### Scripting click actions
 
-Each click action is a shell script in the `click-actions` directory:
+The most convenient way is to write a shell script in the `click-actions` directory. Any language could be used, though. There are three "default" actions as small C programs: `raise`, `minimize` and `close`.
 
-```
-click-actions/
-    raise
-    minimize
-    close
-```
+You can write a new action as a script such as:
 
-You can write a new script such as:
-
-`click-actions/foo`
+`click-actions/foo.sh`
 
 ```bash
 #!/bin/sh
@@ -208,10 +201,12 @@ window_id="$1"
 # Do something with the window id of the window that has been clicked/scrolled on
 ```
 
+Set the script as executable: `chmod +x click-actions/foo.sh`
+
 Then in `config.toml`:
 
 ```toml
-active_window_middle_click = "foo"
+active_window_middle_click = "foo.sh"
 ```
 
 Window id is always given as arg `$1`. Tools I know that could be used to make something happen with a window id:

@@ -291,20 +291,20 @@ void output(struct window_props* wlist, int n, Window active_window, char* path)
         char* window_ul_color;
 
         if (wid != active_window) {
-            snprintf(window_left_click,   MAX_STR_LEN, "sh %s/click-actions/%s 0x%lx", path, config.inactive_window_left_click,   wid);
-            snprintf(window_middle_click, MAX_STR_LEN, "sh %s/click-actions/%s 0x%lx", path, config.inactive_window_middle_click, wid);
-            snprintf(window_right_click,  MAX_STR_LEN, "sh %s/click-actions/%s 0x%lx", path, config.inactive_window_right_click,  wid);
-            snprintf(window_scroll_up,    MAX_STR_LEN, "sh %s/click-actions/%s 0x%lx", path, config.inactive_window_scroll_up,    wid);
-            snprintf(window_scroll_down,  MAX_STR_LEN, "sh %s/click-actions/%s 0x%lx", path, config.inactive_window_scroll_down,  wid);
+            snprintf(window_left_click,   MAX_STR_LEN, "%s/click-actions/%s 0x%lx", path, config.inactive_window_left_click,   wid);
+            snprintf(window_middle_click, MAX_STR_LEN, "%s/click-actions/%s 0x%lx", path, config.inactive_window_middle_click, wid);
+            snprintf(window_right_click,  MAX_STR_LEN, "%s/click-actions/%s 0x%lx", path, config.inactive_window_right_click,  wid);
+            snprintf(window_scroll_up,    MAX_STR_LEN, "%s/click-actions/%s 0x%lx", path, config.inactive_window_scroll_up,    wid);
+            snprintf(window_scroll_down,  MAX_STR_LEN, "%s/click-actions/%s 0x%lx", path, config.inactive_window_scroll_down,  wid);
             window_fg_color = config.inactive_window_fg_color;
             window_bg_color = config.inactive_window_bg_color;
             window_ul_color = config.inactive_window_ul_color;
         } else {
-            snprintf(window_left_click,   MAX_STR_LEN, "sh %s/click-actions/%s 0x%lx", path, config.active_window_left_click,   wid);
-            snprintf(window_middle_click, MAX_STR_LEN, "sh %s/click-actions/%s 0x%lx", path, config.active_window_middle_click, wid);
-            snprintf(window_right_click,  MAX_STR_LEN, "sh %s/click-actions/%s 0x%lx", path, config.active_window_right_click,  wid);
-            snprintf(window_scroll_up,    MAX_STR_LEN, "sh %s/click-actions/%s 0x%lx", path, config.active_window_scroll_up,    wid);
-            snprintf(window_scroll_down,  MAX_STR_LEN, "sh %s/click-actions/%s 0x%lx", path, config.active_window_scroll_down,  wid);
+            snprintf(window_left_click,   MAX_STR_LEN, "%s/click-actions/%s 0x%lx", path, config.active_window_left_click,   wid);
+            snprintf(window_middle_click, MAX_STR_LEN, "%s/click-actions/%s 0x%lx", path, config.active_window_middle_click, wid);
+            snprintf(window_right_click,  MAX_STR_LEN, "%s/click-actions/%s 0x%lx", path, config.active_window_right_click,  wid);
+            snprintf(window_scroll_up,    MAX_STR_LEN, "%s/click-actions/%s 0x%lx", path, config.active_window_scroll_up,    wid);
+            snprintf(window_scroll_down,  MAX_STR_LEN, "%s/click-actions/%s 0x%lx", path, config.active_window_scroll_down,  wid);
             window_fg_color = config.active_window_fg_color;
             window_bg_color = config.active_window_bg_color;
             window_ul_color = config.active_window_ul_color;
@@ -409,40 +409,14 @@ void spy_root_window(Display* d, char* path) {
     free(prev_wlist);
 }
 
-Window str_to_wid(char* str) {
-    unsigned long wid;
-    if (sscanf(str, "0x%lx", &wid) != 1) {
-        fputs("Cannot convert argument to number.\n", stderr);
-        return EXIT_FAILURE;
-    }
-    return (Window) wid;
-}
-
 int main(int argc, char* argv[]) {
     char* path = dirname(argv[0]);
 
     Display* d = XOpenDisplay(NULL);
     toml_table_t* tbl = parse_config("config.toml", path);
 
-    if (argc < 2) {
-        // No arguments: listen to XEvents forever
-        // and print the window list (output to stdout)
-        spy_root_window(d, path);
-    } else {
-        // Arguments exist: handle on-click action
-        char* action = argv[1];
-        Window wid = str_to_wid(argv[2]);
-
-        if (!strcmp(action, "--close")) {
-            close_window(d, wid);
-        }
-        if (!strcmp(action, "--raise")) {
-            raise_window(d, wid);
-        }
-        if (!strcmp(action, "--minimize")) {
-            minimize_window(d, wid);
-        }
-    }
+    // Listen to XEvents forever and print the window list (output to stdout)
+    spy_root_window(d, path);
 
     XCloseDisplay(d);
     toml_free(tbl);
