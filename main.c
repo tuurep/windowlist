@@ -250,6 +250,15 @@ void print_polybar_str(char* label, char* fg_color, char* bg_color, char* ul_col
     }
 }
 
+void set_action_str(char* str, char* path, char* option, Window wid) {
+    if (is_unused(option)) {
+        strcpy(str, "none");
+        return;
+    }
+    
+    snprintf(str, MAX_STR_LEN, "%s/click-actions/%s 0x%lx", path, option, wid);
+}
+
 void output(struct window_props* wlist, int n, Window active_window, char* path) {
 
     if (!strcmp(config.sort_by, "application")) {
@@ -285,26 +294,25 @@ void output(struct window_props* wlist, int n, Window active_window, char* path)
         char window_right_click [MAX_STR_LEN];
         char window_scroll_up   [MAX_STR_LEN];
         char window_scroll_down [MAX_STR_LEN];
-
         char* window_fg_color;
         char* window_bg_color;
         char* window_ul_color;
 
         if (wid != active_window) {
-            snprintf(window_left_click,   MAX_STR_LEN, "%s/click-actions/%s 0x%lx", path, config.inactive_window_left_click,   wid);
-            snprintf(window_middle_click, MAX_STR_LEN, "%s/click-actions/%s 0x%lx", path, config.inactive_window_middle_click, wid);
-            snprintf(window_right_click,  MAX_STR_LEN, "%s/click-actions/%s 0x%lx", path, config.inactive_window_right_click,  wid);
-            snprintf(window_scroll_up,    MAX_STR_LEN, "%s/click-actions/%s 0x%lx", path, config.inactive_window_scroll_up,    wid);
-            snprintf(window_scroll_down,  MAX_STR_LEN, "%s/click-actions/%s 0x%lx", path, config.inactive_window_scroll_down,  wid);
+            set_action_str(window_left_click,   path, config.inactive_window_left_click,   wid);
+            set_action_str(window_middle_click, path, config.inactive_window_middle_click, wid);
+            set_action_str(window_right_click,  path, config.inactive_window_right_click,  wid);
+            set_action_str(window_scroll_up,    path, config.inactive_window_scroll_up,    wid);
+            set_action_str(window_scroll_down,  path, config.inactive_window_scroll_down,  wid);
             window_fg_color = config.inactive_window_fg_color;
             window_bg_color = config.inactive_window_bg_color;
             window_ul_color = config.inactive_window_ul_color;
         } else {
-            snprintf(window_left_click,   MAX_STR_LEN, "%s/click-actions/%s 0x%lx", path, config.active_window_left_click,   wid);
-            snprintf(window_middle_click, MAX_STR_LEN, "%s/click-actions/%s 0x%lx", path, config.active_window_middle_click, wid);
-            snprintf(window_right_click,  MAX_STR_LEN, "%s/click-actions/%s 0x%lx", path, config.active_window_right_click,  wid);
-            snprintf(window_scroll_up,    MAX_STR_LEN, "%s/click-actions/%s 0x%lx", path, config.active_window_scroll_up,    wid);
-            snprintf(window_scroll_down,  MAX_STR_LEN, "%s/click-actions/%s 0x%lx", path, config.active_window_scroll_down,  wid);
+            set_action_str(window_left_click,   path, config.active_window_left_click,   wid);
+            set_action_str(window_middle_click, path, config.active_window_middle_click, wid);
+            set_action_str(window_right_click,  path, config.active_window_right_click,  wid);
+            set_action_str(window_scroll_up,    path, config.active_window_scroll_up,    wid);
+            set_action_str(window_scroll_down,  path, config.active_window_scroll_down,  wid);
             window_fg_color = config.active_window_fg_color;
             window_bg_color = config.active_window_bg_color;
             window_ul_color = config.active_window_ul_color;
