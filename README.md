@@ -14,6 +14,7 @@ Windowlist has been fully rewritten in C using the relevant parts of the source 
     * By the application name
 * Ability to set nicknames for windows if a window has a bad default name
 * More flexible styling
+* Configurable click actions
 
 ## Installation
 
@@ -36,7 +37,7 @@ Add module `windowlist` in any of `modules-left`, `modules-center` or `modules-r
 
 Windowlist can be configured in `config.toml` in the root of the project.
 
-All options are detailed here:
+All options are detailed below:
 
 <table>
     <tbody>
@@ -93,14 +94,35 @@ All options are detailed here:
             <td align="center">number (int)</td>
         </tr>
         <tr>
+            <td><code>separator_string</code></td>
+            <td>String displayed between window names</td>
+            <td align="center">any string</td>
+        </tr>
+        <tr>
             <td><code>empty_desktop_string</code></td>
             <td>String to show when no windows are open</td>
             <td align="center">any string</td>
         </tr>
         <tr>
-            <td><code>separator_string</code></td>
-            <td>String displayed between window names</td>
-            <td align="center">any string</td>
+            <td>
+                <code>active_window_left_click</code><br>
+                <code>active_window_middle_click</code><br>
+                <code>active_window_right_click</code><br>
+                <code>active_window_scroll_up</code><br>
+                <code>active_window_scroll_down</code><br>
+                <code>inactive_window_left_click</code><br>
+                <code>inactive_window_middle_click</code><br>
+                <code>inactive_window_right_click</code><br>
+                <code>inactive_window_scroll_up</code><br>
+                <code>inactive_window_scroll_down</code><br>
+            </td>
+            <td>Click actions for window names can be set as shell scripts. Window currently in focus (active) and unfocused windows (inactive) are configurable separately.</td>
+            <td>
+                <ul>
+                    <li><code>"none"</code>: no action</li>
+                    <li>name of script (string)</li>
+                </ul>
+            </td>
         </tr>
         <tr>
             <td><code>active_window_fg_color</code></td>
@@ -113,13 +135,13 @@ All options are detailed here:
             <td align="center">hex color (string)</td>
         </tr>
         <tr>
-            <td><code>empty_desktop_fg_color</code></td>
-            <td>Foreground color for the string shown when no windows are open</td>
+            <td><code>separator_fg_color</code></td>
+            <td>Foreground color for the string between window names</td>
             <td align="center">hex color (string)</td>
         </tr>
         <tr>
-            <td><code>separator_fg_color</code></td>
-            <td>Foreground color for the string between window names</td>
+            <td><code>empty_desktop_fg_color</code></td>
+            <td>Foreground color for the string shown when no windows are open</td>
             <td align="center">hex color (string)</td>
         </tr>
         <tr>
@@ -162,6 +184,36 @@ All options are detailed here:
 </table>
 
 Note: polybar must be reset before changes take effect.
+
+### Scripting click actions
+
+The most convenient way is to write a shell script in the `click-actions` directory. Any language could be used, though. There are three "default" actions as small C programs: `raise`, `minimize` and `close`.
+
+You can write a new action as a script such as:
+
+`click-actions/foo.sh`
+
+```bash
+#!/bin/sh
+
+window_id="$1"
+
+# Do something with the window id of the window that has been clicked/scrolled on
+```
+
+Set the script as executable: `chmod +x click-actions/foo.sh`
+
+Then in `config.toml`:
+
+```toml
+active_window_middle_click = "foo.sh"
+```
+
+Window id is always given as arg `$1`. Tools I know that could be used to make something happen with a window id:
+
+* [wmctrl](https://github.com/Conservatory/wmctrl)
+* [xdotool](https://github.com/jordansissel/xdotool)
+* [xdo](https://github.com/baskerville/xdo)
 
 ## Dependencies
 
