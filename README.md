@@ -212,8 +212,9 @@ active_window_middle_click = "foo.sh"
 Window id is always given as arg `$1`. Tools I know that could be used to make something happen with a window id:
 
 * [wmctrl](https://github.com/Conservatory/wmctrl)
-* [xdotool](https://github.com/jordansissel/xdotool)
+* [wmutils](https://github.com/wmutils/core)
 * [xdo](https://github.com/baskerville/xdo)
+* [xdotool](https://github.com/jordansissel/xdotool)
 
 ## Dependencies
 
