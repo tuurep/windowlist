@@ -67,50 +67,53 @@ toml_table_t* parse_config(char* filename, char* path) {
     toml_table_t* tbl = toml_parse_file(fp, errbuf, sizeof(errbuf));
     fclose(fp);
 
-    config.sort_by = toml_table_string(tbl, "sort_by").u.s;
-    config.max_windows = toml_table_int(tbl, "max_windows").u.i;
+    toml_value_t opt;
 
-    config.name = toml_table_string(tbl, "name").u.s;
-    config.name_case = toml_table_string(tbl, "name_case").u.s;
-    config.name_max_length = toml_table_int(tbl, "name_max_length").u.i;
-    config.name_padding = toml_table_int(tbl, "name_padding").u.i;
+    opt = toml_table_string(tbl, "sort_by");  config.sort_by     = opt.ok ? opt.u.s : "position";
+    opt = toml_table_int(tbl, "max_windows"); config.max_windows = opt.ok ? opt.u.i : 13;
 
-    config.empty_desktop_string = toml_table_string(tbl, "empty_desktop_string").u.s;
-    config.separator_string = toml_table_string(tbl, "separator_string").u.s;
+    opt = toml_table_string(tbl, "name");         config.name            = opt.ok ? opt.u.s : "class";
+    opt = toml_table_string(tbl, "name_case");    config.name_case       = opt.ok ? opt.u.s : "lowercase";
+    opt = toml_table_int(tbl, "name_max_length"); config.name_max_length = opt.ok ? opt.u.i : 30;
+    opt = toml_table_int(tbl, "name_padding");    config.name_padding    = opt.ok ? opt.u.i : 1;
 
-    config.active_window_left_click = toml_table_string(tbl, "active_window_left_click").u.s;
-    config.active_window_middle_click = toml_table_string(tbl, "active_window_middle_click").u.s;
-    config.active_window_right_click = toml_table_string(tbl, "active_window_right_click").u.s;
-    config.active_window_scroll_up = toml_table_string(tbl, "active_window_scroll_up").u.s;
-    config.active_window_scroll_down = toml_table_string(tbl, "active_window_scroll_down").u.s;
+    opt = toml_table_string(tbl, "empty_desktop_string"); config.empty_desktop_string = opt.ok ? opt.u.s : "";
+    opt = toml_table_string(tbl, "separator_string");     config.separator_string     = opt.ok ? opt.u.s : "·";
 
-    config.inactive_window_left_click = toml_table_string(tbl, "inactive_window_left_click").u.s;
-    config.inactive_window_middle_click = toml_table_string(tbl, "inactive_window_middle_click").u.s;
-    config.inactive_window_right_click = toml_table_string(tbl, "inactive_window_right_click").u.s;
-    config.inactive_window_scroll_up = toml_table_string(tbl, "inactive_window_scroll_up").u.s;
-    config.inactive_window_scroll_down = toml_table_string(tbl, "inactive_window_scroll_down").u.s;
+    opt = toml_table_string(tbl, "active_window_left_click");   config.active_window_left_click   = opt.ok ? opt.u.s : "minimize";
+    opt = toml_table_string(tbl, "active_window_middle_click"); config.active_window_middle_click = opt.ok ? opt.u.s : "none";
+    opt = toml_table_string(tbl, "active_window_right_click");  config.active_window_right_click  = opt.ok ? opt.u.s : "close";
+    opt = toml_table_string(tbl, "active_window_scroll_up");    config.active_window_scroll_up    = opt.ok ? opt.u.s : "none";
+    opt = toml_table_string(tbl, "active_window_scroll_down");  config.active_window_scroll_down  = opt.ok ? opt.u.s : "none";
 
-    config.active_window_fg_color = toml_table_string(tbl, "active_window_fg_color").u.s;
-    config.active_window_bg_color = toml_table_string(tbl, "active_window_bg_color").u.s;
-    config.active_window_ul_color = toml_table_string(tbl, "active_window_ul_color").u.s;
+    opt = toml_table_string(tbl, "inactive_window_left_click");   config.inactive_window_left_click   = opt.ok ? opt.u.s : "raise";
+    opt = toml_table_string(tbl, "inactive_window_middle_click"); config.inactive_window_middle_click = opt.ok ? opt.u.s : "none";
+    opt = toml_table_string(tbl, "inactive_window_right_click");  config.inactive_window_right_click  = opt.ok ? opt.u.s : "close";
+    opt = toml_table_string(tbl, "inactive_window_scroll_up");    config.inactive_window_scroll_up    = opt.ok ? opt.u.s : "none";
+    opt = toml_table_string(tbl, "inactive_window_scroll_down");  config.inactive_window_scroll_down  = opt.ok ? opt.u.s : "none";
 
-    config.inactive_window_fg_color = toml_table_string(tbl, "inactive_window_fg_color").u.s;
-    config.inactive_window_bg_color = toml_table_string(tbl, "inactive_window_bg_color").u.s;
-    config.inactive_window_ul_color = toml_table_string(tbl, "inactive_window_ul_color").u.s;
+    opt = toml_table_string(tbl, "active_window_fg_color"); config.active_window_fg_color = opt.ok ? opt.u.s : "#e0e0e0";
+    opt = toml_table_string(tbl, "active_window_bg_color"); config.active_window_bg_color = opt.ok ? opt.u.s : "none";
+    opt = toml_table_string(tbl, "active_window_ul_color"); config.active_window_ul_color = opt.ok ? opt.u.s : "none";
 
-    config.separator_fg_color = toml_table_string(tbl, "separator_fg_color").u.s;
-    config.separator_bg_color = toml_table_string(tbl, "separator_bg_color").u.s;
-    config.separator_ul_color = toml_table_string(tbl, "separator_ul_color").u.s;
+    opt = toml_table_string(tbl, "inactive_window_fg_color"); config.inactive_window_fg_color = opt.ok ? opt.u.s : "#808080";
+    opt = toml_table_string(tbl, "inactive_window_bg_color"); config.inactive_window_bg_color = opt.ok ? opt.u.s : "none";
+    opt = toml_table_string(tbl, "inactive_window_ul_color"); config.inactive_window_ul_color = opt.ok ? opt.u.s : "none";
 
-    config.empty_desktop_fg_color = toml_table_string(tbl, "empty_desktop_fg_color").u.s;
-    config.empty_desktop_bg_color = toml_table_string(tbl, "empty_desktop_bg_color").u.s;
-    config.empty_desktop_ul_color = toml_table_string(tbl, "empty_desktop_ul_color").u.s;
+    opt = toml_table_string(tbl, "separator_fg_color"); config.separator_fg_color = opt.ok ? opt.u.s : "#808080";
+    opt = toml_table_string(tbl, "separator_bg_color"); config.separator_bg_color = opt.ok ? opt.u.s : "none";
+    opt = toml_table_string(tbl, "separator_ul_color"); config.separator_ul_color = opt.ok ? opt.u.s : "none";
 
-    config.overflow_fg_color = toml_table_string(tbl, "overflow_fg_color").u.s;
-    config.overflow_bg_color = toml_table_string(tbl, "overflow_bg_color").u.s;
-    config.overflow_ul_color = toml_table_string(tbl, "overflow_ul_color").u.s;
+    opt = toml_table_string(tbl, "empty_desktop_fg_color"); config.empty_desktop_fg_color = opt.ok ? opt.u.s : "#e0e0e0";
+    opt = toml_table_string(tbl, "empty_desktop_bg_color"); config.empty_desktop_bg_color = opt.ok ? opt.u.s : "none";
+    opt = toml_table_string(tbl, "empty_desktop_ul_color"); config.empty_desktop_ul_color = opt.ok ? opt.u.s : "none";
 
-    config.ignored_classes = toml_table_array(tbl, "ignored_classes");
+    opt = toml_table_string(tbl, "overflow_fg_color"); config.overflow_fg_color = opt.ok ? opt.u.s : "#e8c47b";
+    opt = toml_table_string(tbl, "overflow_bg_color"); config.overflow_bg_color = opt.ok ? opt.u.s : "none";
+    opt = toml_table_string(tbl, "overflow_ul_color"); config.overflow_ul_color = opt.ok ? opt.u.s : "none";
+
+    // It's fine if these are NULL
+    config.ignored_classes  = toml_table_array(tbl, "ignored_classes");
     config.window_nicknames = toml_table_table(tbl, "window_nicknames");
 
     return tbl;
@@ -164,6 +167,10 @@ bool is_unused(char* option) {
 }
 
 bool is_ignored(char* class) {
+    if (!config.ignored_classes) {
+        return false;
+    }
+
     for (int i = 0; i < toml_array_len(config.ignored_classes); i++) {
         char* ignored_class = toml_array_string(config.ignored_classes, i).u.s;
         if (!strcasecmp(class, ignored_class)) {
@@ -174,6 +181,10 @@ bool is_ignored(char* class) {
 }
 
 char* get_window_nickname(char* class, char* title) {
+    if (!config.window_nicknames) {
+        return NULL;
+    }
+
     for (int i = 0; i < toml_table_len(config.window_nicknames); i++) {
         int keylen;
 
