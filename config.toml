@@ -1,4 +1,4 @@
-sort_by = "position" # "none" | "position" | "application"
+sort_by = "none" # "none" | "position" | "application"
 max_windows = 13
 
 name = "class" # "class" | "title"

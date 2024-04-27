@@ -69,7 +69,7 @@ toml_table_t* parse_config(char* filename, char* path) {
 
     toml_value_t opt;
 
-    opt = toml_table_string(tbl, "sort_by");  config.sort_by     = opt.ok ? opt.u.s : "position";
+    opt = toml_table_string(tbl, "sort_by");  config.sort_by     = opt.ok ? opt.u.s : "none";
     opt = toml_table_int(tbl, "max_windows"); config.max_windows = opt.ok ? opt.u.i : 13;
 
     opt = toml_table_string(tbl, "name");         config.name            = opt.ok ? opt.u.s : "class";
