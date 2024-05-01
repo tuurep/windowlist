@@ -395,18 +395,23 @@ void configure_windows_notify(Display* d, struct window_props* prev_wlist, int p
     }
 }
 
-void spy_root_window(Display* d, char* path) {
-    XEvent e;
-    Window root = DefaultRootWindow(d);
+int main(int argc, char* argv[]) {
+    Display* d = XOpenDisplay(NULL);
 
-    // Asks X server to send ConfigureNotify and PropertyNotify events
+    char* path = dirname(argv[0]);
+    toml_table_t* tbl = parse_config("config.toml", path);
+
+    // Ask X server to send ConfigureNotify and PropertyNotify events for root window
     // ConfigureNotify is sent when a window's size or position changes
     // PropertyNotify for changes in client list and active window
+    Window root = DefaultRootWindow(d);
     XSelectInput(d, root, SubstructureNotifyMask | PropertyChangeMask);
 
+    XEvent e;
     struct window_props* prev_wlist = NULL;
     int prev_wlist_len = 0;
 
+    // Listen to XEvents forever and print the window list (output to stdout)
     for (;;) {
         fflush(stdout);
         XNextEvent(d, &e);
@@ -417,7 +422,11 @@ void spy_root_window(Display* d, char* path) {
         if (e.type == ConfigureNotify || e.type == PropertyNotify) {
             int n;
             struct window_props* wlist = generate_window_list(d, current_desktop_id, &n);
+
+            // Get events for individual windows' property changes,
+            // to know when a window's title (WM_NAME) changes
             configure_windows_notify(d, prev_wlist, prev_wlist_len, wlist, n);
+
             output(wlist, n, active_window, path);
 
             free(prev_wlist);
@@ -426,17 +435,7 @@ void spy_root_window(Display* d, char* path) {
         }
     }
     free(prev_wlist);
-}
 
-int main(int argc, char* argv[]) {
-    char* path = dirname(argv[0]);
-
-    Display* d = XOpenDisplay(NULL);
-    toml_table_t* tbl = parse_config("config.toml", path);
-
-    // Listen to XEvents forever and print the window list (output to stdout)
-    spy_root_window(d, path);
-
-    XCloseDisplay(d);
     toml_free(tbl);
+    XCloseDisplay(d);
 }
