@@ -13,6 +13,11 @@ int client_msg(Display* d, Window w, char* msg) {
     e.xclient.message_type = XInternAtom(d, msg, False);
     e.xclient.window = w;
     e.xclient.format = 32;
+    e.xclient.data.l[0] = 0;
+    e.xclient.data.l[1] = 0;
+    e.xclient.data.l[2] = 0;
+    e.xclient.data.l[3] = 0;
+    e.xclient.data.l[4] = 0;
 
     if (XSendEvent(d, DefaultRootWindow(d), False, mask, &e)) {
         return EXIT_SUCCESS;
