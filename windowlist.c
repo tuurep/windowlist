@@ -146,7 +146,7 @@ void calculate_window_middle_x_y(Display* d, Window w, int* x, int* y) {
 
 char* get_window_class(Display* d, Window w) {
     char* empty_wname = "N/A";
-    char* empty = malloc(strlen(empty_wname)+1 * sizeof(char));
+    char* empty = malloc(strlen(empty_wname) + 1);
     strcpy(empty, empty_wname);
 
     unsigned long size;
@@ -182,7 +182,7 @@ char* get_window_class(Display* d, Window w) {
 
 char* get_window_title(Display *d, Window w) {
     char* empty_wname = "N/A";
-    char* empty = malloc(strlen(empty_wname)+1 * sizeof(char));
+    char* empty = malloc(strlen(empty_wname) + 1);
     strcpy(empty, empty_wname);
 
     char* title_utf8;
