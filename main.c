@@ -151,12 +151,19 @@ int compare_position(const void* v1, const void* v2) {
     return 0;
 }
 
-void pad_spaces(char* window_name) {
-    int n = config.name_padding;
-    size_t original_length = strlen(window_name);
-    memmove(window_name + n, window_name, original_length + 1);
-    memset(window_name, ' ', n);
-    memset(window_name + n + original_length, ' ', n);
+char* pad_spaces(char* window_name) {
+    int padding = config.name_padding;
+
+    int name_length = strlen(window_name);
+    int padded_length = name_length + (2 * padding);
+
+    char* padded_name = malloc(padded_length + 1);
+
+    memset(padded_name, ' ', padded_length);
+    memcpy(padded_name + padding, window_name, name_length);
+    padded_name[padded_length] = '\0';
+
+    return padded_name;
 }
 
 bool is_unused(char* option) {
@@ -266,7 +273,7 @@ void set_action_str(char* str, char* path, char* option, Window wid) {
         strcpy(str, "none");
         return;
     }
-    
+
     snprintf(str, MAX_STR_LEN, "%s/click-actions/%s 0x%lx", path, option, wid);
 }
 
@@ -329,15 +336,14 @@ void output(struct window_props* wlist, int n, Window active_window, char* path)
             window_ul_color = config.active_window_ul_color;
         }
 
-        char* window_name = get_window_nickname(class, title);
-        
-        if (!window_name) {
+        char* window_nickname = get_window_nickname(class, title);
+        char* window_name = window_nickname;
+
+        if (!window_nickname) {
             if (!strcmp(config.name, "title")) {
-                window_name = malloc(strlen(title)+1 + (config.name_padding * 2) * sizeof(char));
-                strcpy(window_name, title);
+                window_name = title;
             } else {
-                window_name = malloc(strlen(class)+1 + (config.name_padding * 2) * sizeof(char));
-                strcpy(window_name, class);
+                window_name = class;
             }
         }
 
@@ -353,16 +359,17 @@ void output(struct window_props* wlist, int n, Window active_window, char* path)
             uppercase(window_name);
         }
 
-        pad_spaces(window_name);
+        char* padded_name = pad_spaces(window_name);
 
-        print_polybar_str(window_name, window_fg_color, window_bg_color, window_ul_color,
+        print_polybar_str(padded_name, window_fg_color, window_bg_color, window_ul_color,
                           window_left_click, window_middle_click, window_right_click,
                           window_scroll_up, window_scroll_down);
 
         window_count++;
-        free(window_name);
-        free(wlist[i].class);
-        free(wlist[i].title);
+        free(window_nickname);
+        free(padded_name);
+        free(class);
+        free(title);
     }
 
     if (window_count == 0) {
