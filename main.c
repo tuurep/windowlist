@@ -289,16 +289,12 @@ void output(struct window_props* wlist, int n, Window active_window, char* path)
     int window_count = 0;
 
     for (int i = 0; i < n; i++) {
-        if (window_count > config.max_windows) {
-            window_count++;
+        if (is_ignored(wlist[i].class)) {
             continue;
         }
 
-        char* class = wlist[i].class;
-        char* title = wlist[i].title;
-        Window wid = wlist[i].id;
-
-        if (is_ignored(class)) {
+        if (window_count > config.max_windows) {
+            window_count++;
             continue;
         }
 
@@ -316,34 +312,34 @@ void output(struct window_props* wlist, int n, Window active_window, char* path)
         char* window_bg_color;
         char* window_ul_color;
 
-        if (wid != active_window) {
-            set_action_str(window_left_click,   path, config.inactive_window_left_click,   wid);
-            set_action_str(window_middle_click, path, config.inactive_window_middle_click, wid);
-            set_action_str(window_right_click,  path, config.inactive_window_right_click,  wid);
-            set_action_str(window_scroll_up,    path, config.inactive_window_scroll_up,    wid);
-            set_action_str(window_scroll_down,  path, config.inactive_window_scroll_down,  wid);
+        if (wlist[i].id != active_window) {
+            set_action_str(window_left_click,   path, config.inactive_window_left_click,   wlist[i].id);
+            set_action_str(window_middle_click, path, config.inactive_window_middle_click, wlist[i].id);
+            set_action_str(window_right_click,  path, config.inactive_window_right_click,  wlist[i].id);
+            set_action_str(window_scroll_up,    path, config.inactive_window_scroll_up,    wlist[i].id);
+            set_action_str(window_scroll_down,  path, config.inactive_window_scroll_down,  wlist[i].id);
             window_fg_color = config.inactive_window_fg_color;
             window_bg_color = config.inactive_window_bg_color;
             window_ul_color = config.inactive_window_ul_color;
         } else {
-            set_action_str(window_left_click,   path, config.active_window_left_click,   wid);
-            set_action_str(window_middle_click, path, config.active_window_middle_click, wid);
-            set_action_str(window_right_click,  path, config.active_window_right_click,  wid);
-            set_action_str(window_scroll_up,    path, config.active_window_scroll_up,    wid);
-            set_action_str(window_scroll_down,  path, config.active_window_scroll_down,  wid);
+            set_action_str(window_left_click,   path, config.active_window_left_click,   wlist[i].id);
+            set_action_str(window_middle_click, path, config.active_window_middle_click, wlist[i].id);
+            set_action_str(window_right_click,  path, config.active_window_right_click,  wlist[i].id);
+            set_action_str(window_scroll_up,    path, config.active_window_scroll_up,    wlist[i].id);
+            set_action_str(window_scroll_down,  path, config.active_window_scroll_down,  wlist[i].id);
             window_fg_color = config.active_window_fg_color;
             window_bg_color = config.active_window_bg_color;
             window_ul_color = config.active_window_ul_color;
         }
 
-        char* window_nickname = get_window_nickname(class, title);
+        char* window_nickname = get_window_nickname(wlist[i].class, wlist[i].title);
         char* window_name = window_nickname;
 
         if (!window_nickname) {
             if (!strcmp(config.name, "title")) {
-                window_name = title;
+                window_name = wlist[i].title;
             } else {
-                window_name = class;
+                window_name = wlist[i].class;
             }
         }
 
@@ -368,8 +364,8 @@ void output(struct window_props* wlist, int n, Window active_window, char* path)
         window_count++;
         free(window_nickname);
         free(padded_name);
-        free(class);
-        free(title);
+        free(wlist[i].class);
+        free(wlist[i].title);
     }
 
     if (window_count == 0) {
