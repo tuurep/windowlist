@@ -251,9 +251,15 @@ void print_polybar_str(char* label, char* fg_color, char* bg_color, char* ul_col
         printf("%%{u%s}%%{+u}", ul_color);
     }
 
-    printf("%%{F%s}", fg_color);
+    if (!is_unused(fg_color)) {
+        printf("%%{F%s}", fg_color);
+    }
+
     printf(label);
-    printf("%%{F-}");
+
+    if (!is_unused(fg_color)) {
+        printf("%%{F-}");
+    }
 
     if (!is_unused(ul_color)) {
         printf("%%{-u}");

@@ -21,7 +21,7 @@ inactive_window_right_click  = "close"
 inactive_window_scroll_up    = "none"
 inactive_window_scroll_down  = "none"
 
-active_window_fg_color = "#e0e0e0"
+active_window_fg_color = "none"
 active_window_bg_color = "none"
 active_window_ul_color = "none"
 
@@ -33,11 +33,11 @@ separator_fg_color = "#808080"
 separator_bg_color = "none"
 separator_ul_color = "none"
 
-empty_desktop_fg_color = "#e0e0e0"
+empty_desktop_fg_color = "none"
 empty_desktop_bg_color = "none"
 empty_desktop_ul_color = "none"
 
-overflow_fg_color = "#e8c47b"
+overflow_fg_color = "none"
 overflow_bg_color = "none"
 overflow_ul_color = "none"
 
