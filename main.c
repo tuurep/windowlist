@@ -92,7 +92,7 @@ toml_table_t* parse_config(char* filename, char* path) {
     opt = toml_table_string(tbl, "inactive_window_scroll_up");    config.inactive_window_scroll_up    = opt.ok ? opt.u.s : "none";
     opt = toml_table_string(tbl, "inactive_window_scroll_down");  config.inactive_window_scroll_down  = opt.ok ? opt.u.s : "none";
 
-    opt = toml_table_string(tbl, "active_window_fg_color"); config.active_window_fg_color = opt.ok ? opt.u.s : "#e0e0e0";
+    opt = toml_table_string(tbl, "active_window_fg_color"); config.active_window_fg_color = opt.ok ? opt.u.s : "none";
     opt = toml_table_string(tbl, "active_window_bg_color"); config.active_window_bg_color = opt.ok ? opt.u.s : "none";
     opt = toml_table_string(tbl, "active_window_ul_color"); config.active_window_ul_color = opt.ok ? opt.u.s : "none";
 
@@ -104,11 +104,11 @@ toml_table_t* parse_config(char* filename, char* path) {
     opt = toml_table_string(tbl, "separator_bg_color"); config.separator_bg_color = opt.ok ? opt.u.s : "none";
     opt = toml_table_string(tbl, "separator_ul_color"); config.separator_ul_color = opt.ok ? opt.u.s : "none";
 
-    opt = toml_table_string(tbl, "empty_desktop_fg_color"); config.empty_desktop_fg_color = opt.ok ? opt.u.s : "#e0e0e0";
+    opt = toml_table_string(tbl, "empty_desktop_fg_color"); config.empty_desktop_fg_color = opt.ok ? opt.u.s : "none";
     opt = toml_table_string(tbl, "empty_desktop_bg_color"); config.empty_desktop_bg_color = opt.ok ? opt.u.s : "none";
     opt = toml_table_string(tbl, "empty_desktop_ul_color"); config.empty_desktop_ul_color = opt.ok ? opt.u.s : "none";
 
-    opt = toml_table_string(tbl, "overflow_fg_color"); config.overflow_fg_color = opt.ok ? opt.u.s : "#e8c47b";
+    opt = toml_table_string(tbl, "overflow_fg_color"); config.overflow_fg_color = opt.ok ? opt.u.s : "none";
     opt = toml_table_string(tbl, "overflow_bg_color"); config.overflow_bg_color = opt.ok ? opt.u.s : "none";
     opt = toml_table_string(tbl, "overflow_ul_color"); config.overflow_ul_color = opt.ok ? opt.u.s : "none";
 
