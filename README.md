@@ -185,6 +185,12 @@ All options are detailed below:
 
 Note: polybar must be reset before changes take effect.
 
+### Defaults
+
+Check the `config.toml` in this repo, the options set there are the default values.
+
+You can also remove any key and it will fall back to the default value.
+
 ### Scripting click actions
 
 The most convenient way is to write a shell script in the `click-actions` directory. Any language could be used, though. There are three "default" actions as small C programs: `raise`, `minimize` and `close`.
