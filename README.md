@@ -125,29 +125,29 @@ All options are detailed below:
             </td>
         </tr>
         <tr>
-            <td><code>active_window_fg_color</code></td>
-            <td>Foreground color for the currently focused window</td>
-            <td align="center">hex color (string)</td>
-        </tr>
-        <tr>
-            <td><code>inactive_window_fg_color</code></td>
-            <td>Foreground color for unfocused windows</td>
-            <td align="center">hex color (string)</td>
-        </tr>
-        <tr>
-            <td><code>separator_fg_color</code></td>
-            <td>Foreground color for the string between window names</td>
-            <td align="center">hex color (string)</td>
-        </tr>
-        <tr>
-            <td><code>empty_desktop_fg_color</code></td>
-            <td>Foreground color for the string shown when no windows are open</td>
-            <td align="center">hex color (string)</td>
-        </tr>
-        <tr>
-            <td><code>overflow_fg_color</code></td>
-            <td>Foreground color for the string that indicates max windows exceeding e.g. <code>(+3)</code></td>
-            <td align="center">hex color (string)</td>
+            <td>
+                <code>active_window_fg_color</code>
+                <code>inactive_window_fg_color</code>
+                <code>separator_fg_color</code>
+                <code>empty_desktop_fg_color</code>
+                <code>overflow_fg_color</code>
+            </td>
+            <td>
+                Foreground colors for:
+                <ul>
+                    <li>Currently focused window</li>
+                    <li>Windows not in focus</li>
+                    <li>The <code>separator_string</code></li>
+                    <li>The <code>empty_desktop_string</code></li>
+                    <li>The string shown when <code>max_windows</code> exceeded</li>
+                </ul>
+            </td>
+            <td>
+                <ul>
+                    <li><code>"none"</code>: default polybar fg</code></li>
+                    <li>hex color (string)</li>
+                </ul>
+            </td>
         </tr>
         <tr>
             <td><code>*_bg_color</code></td>
