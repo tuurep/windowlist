@@ -226,4 +226,4 @@ Window id is always given as arg `$1`. Tools I know that could be used to make s
 
 Requires an [EWMH](https://specifications.freedesktop.org/wm-spec/wm-spec-1.3.html) compliant window manager
 
-* Wikipedia list of EWMH compliant window managers: [link](https://en.wikipedia.org/wiki/Extended_Window_Manager_Hints#List_of_window_managers_that_support_Extended_Window_Manager_Hints)
+* Wikipedia table to see if a window manager is EWMH compliant: [link](https://en.wikipedia.org/wiki/Comparison_of_X_window_managers#Features)
