@@ -9,6 +9,6 @@ int main(int argc, char* argv[]) {
     Window wid = str_to_wid(argv[1]);
 
     Display* d = XOpenDisplay(NULL);
-    client_msg(d, wid, "_NET_CLOSE_WINDOW");
+    client_msg(d, wid, "_NET_CLOSE_WINDOW", 0);
     XCloseDisplay(d);
 }

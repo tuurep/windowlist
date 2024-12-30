@@ -4,7 +4,7 @@
 #include <X11/Xatom.h>
 #include "common.h"
 
-int client_msg(Display* d, Window w, char* msg) {
+int client_msg(Display* d, Window w, char* msg, long desktop) {
     XEvent e;
     long mask = SubstructureRedirectMask | SubstructureNotifyMask;
 
@@ -14,7 +14,11 @@ int client_msg(Display* d, Window w, char* msg) {
     e.xclient.message_type = XInternAtom(d, msg, False);
     e.xclient.window = w;
     e.xclient.format = 32;
-    e.xclient.data.l[0] = 0;
+
+    // NOTE: I used to set all these as 0 since they weren't used anywhere.
+    // But now with desktop switching with `raise`, the first one is needed for target desktop.
+    // In the future if something else uses it for some other purpose, rename it to `data0` or whatever.
+    e.xclient.data.l[0] = desktop;
     e.xclient.data.l[1] = 0;
     e.xclient.data.l[2] = 0;
     e.xclient.data.l[3] = 0;
