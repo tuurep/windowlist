@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
+#include "common.h"
 
 int client_msg(Display* d, Window w, char* msg) {
     XEvent e;
@@ -34,14 +35,4 @@ Window str_to_wid(char* str) {
         return EXIT_FAILURE;
     }
     return (Window) wid;
-}
-
-int main(int argc, char* argv[]) {
-    // Must take a window id as first argument
-    Window wid = str_to_wid(argv[1]);
-
-    Display* d = XOpenDisplay(NULL);
-    client_msg(d, wid, "_NET_ACTIVE_WINDOW");
-    XMapRaised(d, wid);
-    XCloseDisplay(d);
 }
