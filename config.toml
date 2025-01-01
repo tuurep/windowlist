@@ -1,5 +1,6 @@
 sort_by = "none" # "none" | "position" | "application"
 max_windows = 13
+all_desktops = false
 
 name = "class" # "class" | "title"
 name_case = "lowercase" # "none" | "lowercase" | "uppercase"
