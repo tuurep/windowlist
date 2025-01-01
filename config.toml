@@ -47,5 +47,5 @@ ignored_classes = [
 ]
 
 [window_nicknames]
-# foo = "bar"
-# baz = "qux"
+# "foo" = "bar"
+# "baz" = "qux"

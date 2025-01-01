@@ -177,7 +177,9 @@ All options are detailed below:
         </tr>
         <tr>
             <td><code>window_nicknames</code></td>
-            <td>A window name can be substituted with a custom name using key value pairs. The keys are matched case insensitively.</td>
+            <td>A window name can be substituted with a custom name using key value pairs. The keys are matched case insensitively.
+            <br><br>
+            The key should be double quoted in case the window class contains special characters like dots (<code>.</code>).</td>
             <td align="center">table of string key-value pairs</td>
         </tr>
     </tbody>
