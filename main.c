@@ -12,6 +12,7 @@
 struct configuration {
     char* sort_by;
     int max_windows;
+    bool all_desktops;
 
     char* name;
     char* name_case;
@@ -69,8 +70,9 @@ toml_table_t* parse_config(char* filename, char* path) {
 
     toml_value_t opt;
 
-    opt = toml_table_string(tbl, "sort_by");  config.sort_by     = opt.ok ? opt.u.s : "none";
-    opt = toml_table_int(tbl, "max_windows"); config.max_windows = opt.ok ? opt.u.i : 13;
+    opt = toml_table_string(tbl, "sort_by");    config.sort_by      = opt.ok ? opt.u.s : "none";
+    opt = toml_table_int(tbl, "max_windows");   config.max_windows  = opt.ok ? opt.u.i : 13;
+    opt = toml_table_bool(tbl, "all_desktops"); config.all_desktops = opt.ok ? opt.u.b : false;
 
     opt = toml_table_string(tbl, "name");         config.name            = opt.ok ? opt.u.s : "class";
     opt = toml_table_string(tbl, "name_case");    config.name_case       = opt.ok ? opt.u.s : "lowercase";
@@ -283,7 +285,7 @@ void set_action_str(char* str, char* path, char* option, Window wid) {
     snprintf(str, MAX_STR_LEN, "%s/click-actions/%s 0x%lx", path, option, wid);
 }
 
-void output(struct window_props* wlist, int n, Window active_window, char* path) {
+void output(struct window_props* wlist, int n, Window active_window, long current_desktop_id, char* path) {
 
     if (!strcmp(config.sort_by, "application")) {
         qsort(wlist, n, sizeof(struct window_props), compare_window_class);
@@ -295,11 +297,31 @@ void output(struct window_props* wlist, int n, Window active_window, char* path)
     int window_count = 0;
 
     for (int i = 0; i < n; i++) {
+
+        // Don't show 'omnipresent' windows, which have desktop ID -1
+        // otherwise e.g. 'polybar' shows in the list
+        // (Also if a window's desktop ID couldn't be retrieved, get_desktop_id() returns -2)
+        if (wlist[i].desktop_id < 0) {
+            free(wlist[i].class);
+            free(wlist[i].title);
+            continue;
+        }
+
+        if (!config.all_desktops && wlist[i].desktop_id != current_desktop_id) {
+            free(wlist[i].class);
+            free(wlist[i].title);
+            continue;
+        }
+
         if (is_ignored(wlist[i].class)) {
+            free(wlist[i].class);
+            free(wlist[i].title);
             continue;
         }
 
         if (window_count > config.max_windows) {
+            free(wlist[i].class);
+            free(wlist[i].title);
             window_count++;
             continue;
         }
@@ -429,14 +451,15 @@ int main(int argc, char* argv[]) {
         Window active_window = get_active_window(d);
 
         if (e.type == ConfigureNotify || e.type == PropertyNotify) {
+            
             int n;
-            struct window_props* wlist = generate_window_list(d, current_desktop_id, &n);
+            struct window_props* wlist = generate_window_list(d, &n);
 
             // Get events for individual windows' property changes,
             // to know when a window's title (WM_NAME) changes
             configure_windows_notify(d, prev_wlist, prev_wlist_len, wlist, n);
 
-            output(wlist, n, active_window, path);
+            output(wlist, n, active_window, current_desktop_id, path);
 
             free(prev_wlist);
             prev_wlist = wlist;

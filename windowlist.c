@@ -237,7 +237,7 @@ int error_catcher(Display* d, XErrorEvent* e) {
     return EXIT_FAILURE;
 }
 
-struct window_props* generate_window_list(Display* d, long current_desktop_id, int* window_list_size) {
+struct window_props* generate_window_list(Display* d, int* window_list_size) {
     Window* client_list;
     unsigned long client_list_size;
 
@@ -245,40 +245,27 @@ struct window_props* generate_window_list(Display* d, long current_desktop_id, i
         return NULL;
     }
 
-    int n_clients = client_list_size / sizeof(Window);
-    struct window_props* window_list = malloc(n_clients * sizeof(struct window_props));
-
-    // Number of windows on current desktop
-    int w_count = 0;
+    *window_list_size = client_list_size / sizeof(Window);
+    struct window_props* window_list = malloc(*window_list_size * sizeof(struct window_props));
 
     XSetErrorHandler(error_catcher);
 
     // Populate the list
-    for (int i = 0; i < n_clients; i++) {
+    for (int i = 0; i < *window_list_size; i++) {
         Window w = client_list[i];
-
-        long desktop_id = get_desktop_id(d, w, "_NET_WM_DESKTOP");
-        if (desktop_id != current_desktop_id) {
-            continue;
-        }
-
         struct window_props wp;
+
         wp.id = w;
         wp.class = get_window_class(d, w);
         wp.title = get_window_title(d, w);
+        wp.desktop_id = get_desktop_id(d, w, "_NET_WM_DESKTOP");
         calculate_window_middle_x_y(d, w, &wp.x, &wp.y);
 
-        window_list[w_count] = wp;
-        w_count++;
+        window_list[i] = wp;
     }
 
     XSetErrorHandler(NULL);
     free(client_list);
-
-    *window_list_size = w_count;
-
-    // Remove uninitialized part from array end
-    window_list = realloc(window_list, *window_list_size * sizeof(struct window_props));
 
     return window_list;
 }

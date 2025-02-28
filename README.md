@@ -63,6 +63,11 @@ All options are detailed below:
             <td align="center">number (int)</td>
         </tr>
         <tr>
+            <td><code>all_desktops</code></td>
+            <td>List windows from all desktops, instead of the current desktop only</td>
+            <td align="center">boolean (true/false)</td>
+        </tr>
+        <tr>
             <td><code>name</code></td>
             <td>Which X window property is considered window name (label for a window)</td>
             <td>
