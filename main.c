@@ -428,44 +428,53 @@ void configure_windows_notify(Display* d, struct window_props* prev_wlist, int p
 
 int main(int argc, char* argv[]) {
     Display* d = XOpenDisplay(NULL);
+    Window root = DefaultRootWindow(d);
 
     char* path = dirname(argv[0]);
     toml_table_t* tbl = parse_config("config.toml", path);
 
+    int wlist_len;
+    struct window_props* wlist = generate_window_list(d, &wlist_len);
+
+    int prev_wlist_len = 0;
+    struct window_props* prev_wlist = NULL;
+
+    Window active_window = get_active_window(d);
+    long current_desktop_id = get_desktop_id(d, root, "_NET_CURRENT_DESKTOP");
+
+    // Initialize module on polybar launch
+    output(wlist, wlist_len, active_window, current_desktop_id, path);
+
     // Ask X server to send ConfigureNotify and PropertyNotify events for root window
     // ConfigureNotify is sent when a window's size or position changes
     // PropertyNotify for changes in client list and active window
-    Window root = DefaultRootWindow(d);
     XSelectInput(d, root, SubstructureNotifyMask | PropertyChangeMask);
 
     XEvent e;
-    struct window_props* prev_wlist = NULL;
-    int prev_wlist_len = 0;
 
-    // Listen to XEvents forever and print the window list (output to stdout)
+    // Listen to XEvents forever and update the window list (output to stdout)
     for (;;) {
         fflush(stdout);
-        XNextEvent(d, &e);
-
-        long current_desktop_id = get_desktop_id(d, root, "_NET_CURRENT_DESKTOP");
-        Window active_window = get_active_window(d);
+        XNextEvent(d, &e); // Blocks until next event
 
         if (e.type == ConfigureNotify || e.type == PropertyNotify) {
-            
-            int n;
-            struct window_props* wlist = generate_window_list(d, &n);
+            free(prev_wlist);
+            prev_wlist = wlist;
+            prev_wlist_len = wlist_len;
+
+            wlist = generate_window_list(d, &wlist_len);
 
             // Get events for individual windows' property changes,
             // to know when a window's title (WM_NAME) changes
-            configure_windows_notify(d, prev_wlist, prev_wlist_len, wlist, n);
+            configure_windows_notify(d, prev_wlist, prev_wlist_len, wlist, wlist_len);
 
-            output(wlist, n, active_window, current_desktop_id, path);
+            current_desktop_id = get_desktop_id(d, root, "_NET_CURRENT_DESKTOP");
+            active_window = get_active_window(d);
 
-            free(prev_wlist);
-            prev_wlist = wlist;
-            prev_wlist_len = n;
+            output(wlist, wlist_len, active_window, current_desktop_id, path);
         }
     }
+    free(wlist);
     free(prev_wlist);
 
     toml_free(tbl);
