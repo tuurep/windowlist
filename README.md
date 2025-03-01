@@ -37,6 +37,10 @@ Add module `windowlist` in any of `modules-left`, `modules-center` or `modules-r
 
 Windowlist can be configured in `config.toml` in the root of the project.
 
+If `config.toml` doesn't already exist, it will be created as a copy of `config-default.toml` when running `make`. It will not be overwritten if it exists.
+
+Keys can be removed or commented out from `config.toml`, they will fall back to the default values in that case.
+
 All options are detailed below:
 
 <table>
@@ -191,12 +195,6 @@ All options are detailed below:
 </table>
 
 Note: polybar must be reset before changes take effect.
-
-### Defaults
-
-Check the `config.toml` in this repo, the options set there are the default values.
-
-You can also remove any key and it will fall back to the default value.
 
 ### Scripting click actions
 
