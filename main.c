@@ -54,6 +54,12 @@ struct configuration {
     char* overflow_bg_color;
     char* overflow_ul_color;
 
+    int active_window_font;
+    int inactive_window_font;
+    int separator_font;
+    int empty_desktop_font;
+    int overflow_font;
+
     toml_array_t* ignored_classes;
     toml_table_t* window_nicknames;
 } config;
@@ -113,6 +119,12 @@ toml_table_t* parse_config(char* filename, char* path) {
     opt = toml_table_string(tbl, "overflow_fg_color"); config.overflow_fg_color = opt.ok ? opt.u.s : "none";
     opt = toml_table_string(tbl, "overflow_bg_color"); config.overflow_bg_color = opt.ok ? opt.u.s : "none";
     opt = toml_table_string(tbl, "overflow_ul_color"); config.overflow_ul_color = opt.ok ? opt.u.s : "none";
+
+    opt = toml_table_int(tbl, "active_window_font");   config.active_window_font   = opt.ok ? opt.u.i : 0;
+    opt = toml_table_int(tbl, "inactive_window_font"); config.inactive_window_font = opt.ok ? opt.u.i : 0;
+    opt = toml_table_int(tbl, "separator_font");       config.separator_font       = opt.ok ? opt.u.i : 0;
+    opt = toml_table_int(tbl, "empty_desktop_font");   config.empty_desktop_font   = opt.ok ? opt.u.i : 0;
+    opt = toml_table_int(tbl, "overflow_font");        config.overflow_font        = opt.ok ? opt.u.i : 0;
 
     // It's fine if these are NULL
     config.ignored_classes  = toml_table_array(tbl, "ignored_classes");
@@ -215,7 +227,7 @@ char* get_window_nickname(char* class, char* title) {
     return NULL;
 }
 
-void print_polybar_str(char* label, char* fg_color, char* bg_color, char* ul_color,
+void print_polybar_str(char* label, char* fg_color, char* bg_color, char* ul_color, int font,
                        char* l_click, char* m_click, char* r_click, char* scroll_up, char* scroll_down) {
 
     int actions_count = 0;
@@ -257,7 +269,17 @@ void print_polybar_str(char* label, char* fg_color, char* bg_color, char* ul_col
         printf("%%{F%s}", fg_color);
     }
 
+    // No need to print font tag if it would be %{T1} (`font-0`)
+    if (font > 0) {
+        // Convert to %{T#} tag's 1-based indexing
+        printf("%%{T%d}", font + 1);
+    }
+
     printf(label);
+
+    if (font > 0) {
+        printf("%%{T-}");
+    }
 
     if (!is_unused(fg_color)) {
         printf("%%{F-}");
@@ -328,7 +350,7 @@ void output(struct window_props* wlist, int n, Window active_window, long curren
 
         if (window_count > 0) {
             print_polybar_str(config.separator_string, config.separator_fg_color, config.separator_bg_color, config.separator_ul_color,
-                              "none", "none", "none", "none", "none");
+                              config.separator_font, "none", "none", "none", "none", "none");
         }
 
         char window_left_click  [MAX_STR_LEN];
@@ -339,6 +361,7 @@ void output(struct window_props* wlist, int n, Window active_window, long curren
         char* window_fg_color;
         char* window_bg_color;
         char* window_ul_color;
+        int window_font;
 
         if (wlist[i].id != active_window) {
             set_action_str(window_left_click,   path, config.inactive_window_left_click,   wlist[i].id);
@@ -349,6 +372,7 @@ void output(struct window_props* wlist, int n, Window active_window, long curren
             window_fg_color = config.inactive_window_fg_color;
             window_bg_color = config.inactive_window_bg_color;
             window_ul_color = config.inactive_window_ul_color;
+            window_font = config.inactive_window_font;
         } else {
             set_action_str(window_left_click,   path, config.active_window_left_click,   wlist[i].id);
             set_action_str(window_middle_click, path, config.active_window_middle_click, wlist[i].id);
@@ -358,6 +382,7 @@ void output(struct window_props* wlist, int n, Window active_window, long curren
             window_fg_color = config.active_window_fg_color;
             window_bg_color = config.active_window_bg_color;
             window_ul_color = config.active_window_ul_color;
+            window_font = config.active_window_font;
         }
 
         char* window_nickname = get_window_nickname(wlist[i].class, wlist[i].title);
@@ -385,7 +410,7 @@ void output(struct window_props* wlist, int n, Window active_window, long curren
 
         char* padded_name = pad_spaces(window_name);
 
-        print_polybar_str(padded_name, window_fg_color, window_bg_color, window_ul_color,
+        print_polybar_str(padded_name, window_fg_color, window_bg_color, window_ul_color, window_font,
                           window_left_click, window_middle_click, window_right_click,
                           window_scroll_up, window_scroll_down);
 
@@ -398,14 +423,14 @@ void output(struct window_props* wlist, int n, Window active_window, long curren
 
     if (window_count == 0) {
         print_polybar_str(config.empty_desktop_string, config.empty_desktop_fg_color, config.empty_desktop_bg_color, config.empty_desktop_ul_color,
-                          "none", "none", "none", "none", "none");
+                          config.empty_desktop_font, "none", "none", "none", "none", "none");
     }
 
     if (window_count > config.max_windows) {
         char overflow_string[20];
         snprintf(overflow_string, 20, "(+%d)", window_count - config.max_windows);
         print_polybar_str(overflow_string, config.overflow_fg_color, config.overflow_bg_color, config.overflow_ul_color,
-                          "none", "none", "none", "none", "none");
+                          config.overflow_font, "none", "none", "none", "none", "none");
     }
 
     printf("\n");

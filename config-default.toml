@@ -42,6 +42,12 @@ overflow_fg_color = "none"
 overflow_bg_color = "none"
 overflow_ul_color = "none"
 
+active_window_font   = 0
+inactive_window_font = 0
+separator_font       = 0
+empty_desktop_font   = 0
+overflow_font        = 0
+
 ignored_classes = [
     # "foo",
     # "bar"

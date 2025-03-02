@@ -158,7 +158,7 @@ All options are detailed below:
                 <code>inactive_window_scroll_up</code><br>
                 <code>inactive_window_scroll_down</code><br>
             </td>
-            <td>These are all the rest of the click actions that Polybar allows. They do nothing by default, but if you have an idea, see <a href="https://github.com/tuurep/windowlist?tab=readme-ov-file#scripting-click-actions">section about scripting</a>.</td>
+            <td>These are all the rest of the click actions that Polybar allows (TODO: doubleclick actions #33). They do nothing by default, but if you have an idea, see <a href="https://github.com/tuurep/windowlist?tab=readme-ov-file#scripting-click-actions">section about scripting</a>.</td>
             <td>
                 <ul>
                     <li><code>"none"</code>: no action (default)</li>
@@ -220,13 +220,20 @@ All options are detailed below:
         <tr>
             <td><code>*_ul_color</code></td>
             <td>All colors also have an underline color counterpart, e.g. <code>active_window_ul_color</code>.<br><br>
-            Note that <code>line-size</code> must be set to 1 or higher in your polybar <code>config.ini</code>, otherwise underline isn't visible.</td>
+            Note that <code>line-size</code> must be set to 1 or higher in your Polybar <code>config.ini</code>, otherwise underline isn't visible.</td>
             <td>
                 <ul>
                     <li><code>"none"</code>: no underline (default)</li>
                     <li>hex color string</li>
                 </ul>
             </td>
+        </tr>
+        <tr>
+            <td><code>*_font</code></td>
+            <td> All elements can be set to use an alternative font defined in your Polybar <code>config.ini</code>. For example, to use <code>font-1</code> for the active window name, set <code>active_window_font = 1</code>.<br><br>
+            To use a bold variant of a font, set e.g. <code>font-1 = DejaVu Sans:weight=bold</code> in <code>config.ini</code>.<br><br>
+            See <a href="https://github.com/polybar/polybar/wiki/Fonts#fonts">here</a> for more details.</td>
+            <td align="center">number (default: 0)</td>
         </tr>
         <tr>
             <td><code>ignored_classes</code></td>
