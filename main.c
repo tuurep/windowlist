@@ -445,11 +445,16 @@ int main(int argc, char* argv[]) {
     // Initialize module on polybar launch
     output(wlist, wlist_len, active_window, current_desktop_id, path);
 
-    // Ask X server to send ConfigureNotify and PropertyNotify events for root window
-    // ConfigureNotify is sent when a window's size or position changes
-    // PropertyNotify for changes in client list and active window
-    XSelectInput(d, root, SubstructureNotifyMask | PropertyChangeMask);
+    // Receive PropertyNotify for changes in client list and active window change
+    long event_mask = PropertyChangeMask;
 
+    if (!strcmp(config.sort_by, "position")) {
+        // Receive ConfigureNotify for window geometry changes
+        event_mask |= SubstructureNotifyMask;
+    }
+
+    // Ask X server to send the events
+    XSelectInput(d, root, event_mask);
     XEvent e;
 
     // Listen to XEvents forever and update the window list (output to stdout)
@@ -466,7 +471,9 @@ int main(int argc, char* argv[]) {
 
             // Get events for individual windows' property changes,
             // to know when a window's title (WM_NAME) changes
-            configure_windows_notify(d, prev_wlist, prev_wlist_len, wlist, wlist_len);
+            if (!strcmp(config.sort_by, "name")) {
+                configure_windows_notify(d, prev_wlist, prev_wlist_len, wlist, wlist_len);
+            }
 
             current_desktop_id = get_desktop_id(d, root, "_NET_CURRENT_DESKTOP");
             active_window = get_active_window(d);
