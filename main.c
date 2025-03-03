@@ -23,14 +23,20 @@ struct configuration {
     char* separator_string;
 
     char* active_window_left_click;
-    char* active_window_middle_click;
     char* active_window_right_click;
+    char* active_window_middle_click;
+    char* active_window_left_double_click;
+    char* active_window_right_double_click;
+    char* active_window_middle_double_click;
     char* active_window_scroll_up;
     char* active_window_scroll_down;
 
     char* inactive_window_left_click;
-    char* inactive_window_middle_click;
     char* inactive_window_right_click;
+    char* inactive_window_middle_click;
+    char* inactive_window_left_double_click;
+    char* inactive_window_right_double_click;
+    char* inactive_window_middle_double_click;
     char* inactive_window_scroll_up;
     char* inactive_window_scroll_down;
 
@@ -88,17 +94,23 @@ toml_table_t* parse_config(char* filename, char* path) {
     opt = toml_table_string(tbl, "empty_desktop_string"); config.empty_desktop_string = opt.ok ? opt.u.s : "";
     opt = toml_table_string(tbl, "separator_string");     config.separator_string     = opt.ok ? opt.u.s : "·";
 
-    opt = toml_table_string(tbl, "active_window_left_click");   config.active_window_left_click   = opt.ok ? opt.u.s : "minimize";
-    opt = toml_table_string(tbl, "active_window_middle_click"); config.active_window_middle_click = opt.ok ? opt.u.s : "none";
-    opt = toml_table_string(tbl, "active_window_right_click");  config.active_window_right_click  = opt.ok ? opt.u.s : "close";
-    opt = toml_table_string(tbl, "active_window_scroll_up");    config.active_window_scroll_up    = opt.ok ? opt.u.s : "none";
-    opt = toml_table_string(tbl, "active_window_scroll_down");  config.active_window_scroll_down  = opt.ok ? opt.u.s : "none";
+    opt = toml_table_string(tbl, "active_window_left_click");          config.active_window_left_click          = opt.ok ? opt.u.s : "minimize";
+    opt = toml_table_string(tbl, "active_window_right_click");         config.active_window_right_click         = opt.ok ? opt.u.s : "close";
+    opt = toml_table_string(tbl, "active_window_middle_click");        config.active_window_middle_click        = opt.ok ? opt.u.s : "none";
+    opt = toml_table_string(tbl, "active_window_left_double_click");   config.active_window_left_double_click   = opt.ok ? opt.u.s : "none";
+    opt = toml_table_string(tbl, "active_window_right_double_click");  config.active_window_right_double_click  = opt.ok ? opt.u.s : "none";
+    opt = toml_table_string(tbl, "active_window_middle_double_click"); config.active_window_middle_double_click = opt.ok ? opt.u.s : "none";
+    opt = toml_table_string(tbl, "active_window_scroll_up");           config.active_window_scroll_up           = opt.ok ? opt.u.s : "none";
+    opt = toml_table_string(tbl, "active_window_scroll_down");         config.active_window_scroll_down         = opt.ok ? opt.u.s : "none";
 
-    opt = toml_table_string(tbl, "inactive_window_left_click");   config.inactive_window_left_click   = opt.ok ? opt.u.s : "raise";
-    opt = toml_table_string(tbl, "inactive_window_middle_click"); config.inactive_window_middle_click = opt.ok ? opt.u.s : "none";
-    opt = toml_table_string(tbl, "inactive_window_right_click");  config.inactive_window_right_click  = opt.ok ? opt.u.s : "close";
-    opt = toml_table_string(tbl, "inactive_window_scroll_up");    config.inactive_window_scroll_up    = opt.ok ? opt.u.s : "none";
-    opt = toml_table_string(tbl, "inactive_window_scroll_down");  config.inactive_window_scroll_down  = opt.ok ? opt.u.s : "none";
+    opt = toml_table_string(tbl, "inactive_window_left_click");          config.inactive_window_left_click          = opt.ok ? opt.u.s : "raise";
+    opt = toml_table_string(tbl, "inactive_window_right_click");         config.inactive_window_right_click         = opt.ok ? opt.u.s : "close";
+    opt = toml_table_string(tbl, "inactive_window_middle_click");        config.inactive_window_middle_click        = opt.ok ? opt.u.s : "none";
+    opt = toml_table_string(tbl, "inactive_window_left_double_click");   config.inactive_window_left_double_click   = opt.ok ? opt.u.s : "none";
+    opt = toml_table_string(tbl, "inactive_window_right_double_click");  config.inactive_window_right_double_click  = opt.ok ? opt.u.s : "none";
+    opt = toml_table_string(tbl, "inactive_window_middle_double_click"); config.inactive_window_middle_double_click = opt.ok ? opt.u.s : "none";
+    opt = toml_table_string(tbl, "inactive_window_scroll_up");           config.inactive_window_scroll_up           = opt.ok ? opt.u.s : "none";
+    opt = toml_table_string(tbl, "inactive_window_scroll_down");         config.inactive_window_scroll_down         = opt.ok ? opt.u.s : "none";
 
     opt = toml_table_string(tbl, "active_window_fg_color"); config.active_window_fg_color = opt.ok ? opt.u.s : "none";
     opt = toml_table_string(tbl, "active_window_bg_color"); config.active_window_bg_color = opt.ok ? opt.u.s : "none";
@@ -228,7 +240,8 @@ char* get_window_nickname(char* class, char* title) {
 }
 
 void print_polybar_str(char* label, char* fg_color, char* bg_color, char* ul_color, int font,
-                       char* l_click, char* m_click, char* r_click, char* scroll_up, char* scroll_down) {
+                       char* l_click, char* m_click, char* r_click, char* scroll_up, char* scroll_down,
+                       char* l_d_click, char* m_d_click, char* r_d_click) {
 
     int actions_count = 0;
 
@@ -254,6 +267,21 @@ void print_polybar_str(char* label, char* fg_color, char* bg_color, char* ul_col
 
     if (!is_unused(scroll_down)) {
         printf("%%{A5:%s:}", scroll_down);
+        actions_count++;
+    }
+
+    if (!is_unused(l_d_click)) {
+        printf("%%{A6:%s:}", l_d_click);
+        actions_count++;
+    }
+
+    if (!is_unused(m_d_click)) {
+        printf("%%{A7:%s:}", m_d_click);
+        actions_count++;
+    }
+
+    if (!is_unused(r_d_click)) {
+        printf("%%{A8:%s:}", r_d_click);
         actions_count++;
     }
 
@@ -350,35 +378,44 @@ void output(struct window_props* wlist, int n, Window active_window, long curren
 
         if (window_count > 0) {
             print_polybar_str(config.separator_string, config.separator_fg_color, config.separator_bg_color, config.separator_ul_color,
-                              config.separator_font, "none", "none", "none", "none", "none");
+                              config.separator_font, "none", "none", "none", "none", "none", "none", "none", "none");
         }
 
-        char window_left_click  [MAX_STR_LEN];
-        char window_middle_click[MAX_STR_LEN];
-        char window_right_click [MAX_STR_LEN];
-        char window_scroll_up   [MAX_STR_LEN];
-        char window_scroll_down [MAX_STR_LEN];
+        char window_left_click          [MAX_STR_LEN];
+        char window_right_click         [MAX_STR_LEN];
+        char window_middle_click        [MAX_STR_LEN];
+        char window_left_double_click   [MAX_STR_LEN];
+        char window_right_double_click  [MAX_STR_LEN];
+        char window_middle_double_click [MAX_STR_LEN];
+        char window_scroll_up           [MAX_STR_LEN];
+        char window_scroll_down         [MAX_STR_LEN];
         char* window_fg_color;
         char* window_bg_color;
         char* window_ul_color;
         int window_font;
 
         if (wlist[i].id != active_window) {
-            set_action_str(window_left_click,   path, config.inactive_window_left_click,   wlist[i].id);
-            set_action_str(window_middle_click, path, config.inactive_window_middle_click, wlist[i].id);
-            set_action_str(window_right_click,  path, config.inactive_window_right_click,  wlist[i].id);
-            set_action_str(window_scroll_up,    path, config.inactive_window_scroll_up,    wlist[i].id);
-            set_action_str(window_scroll_down,  path, config.inactive_window_scroll_down,  wlist[i].id);
+            set_action_str(window_left_click,          path, config.inactive_window_left_click,          wlist[i].id);
+            set_action_str(window_right_click,         path, config.inactive_window_right_click,         wlist[i].id);
+            set_action_str(window_middle_click,        path, config.inactive_window_middle_click,        wlist[i].id);
+            set_action_str(window_left_double_click,   path, config.inactive_window_left_double_click,   wlist[i].id);
+            set_action_str(window_right_double_click,  path, config.inactive_window_right_double_click,  wlist[i].id);
+            set_action_str(window_middle_double_click, path, config.inactive_window_middle_double_click, wlist[i].id);
+            set_action_str(window_scroll_up,           path, config.inactive_window_scroll_up,           wlist[i].id);
+            set_action_str(window_scroll_down,         path, config.inactive_window_scroll_down,         wlist[i].id);
             window_fg_color = config.inactive_window_fg_color;
             window_bg_color = config.inactive_window_bg_color;
             window_ul_color = config.inactive_window_ul_color;
             window_font = config.inactive_window_font;
         } else {
-            set_action_str(window_left_click,   path, config.active_window_left_click,   wlist[i].id);
-            set_action_str(window_middle_click, path, config.active_window_middle_click, wlist[i].id);
-            set_action_str(window_right_click,  path, config.active_window_right_click,  wlist[i].id);
-            set_action_str(window_scroll_up,    path, config.active_window_scroll_up,    wlist[i].id);
-            set_action_str(window_scroll_down,  path, config.active_window_scroll_down,  wlist[i].id);
+            set_action_str(window_left_click,          path, config.active_window_left_click,          wlist[i].id);
+            set_action_str(window_right_click,         path, config.active_window_right_click,         wlist[i].id);
+            set_action_str(window_middle_click,        path, config.active_window_middle_click,        wlist[i].id);
+            set_action_str(window_left_double_click,   path, config.active_window_left_double_click,   wlist[i].id);
+            set_action_str(window_right_double_click,  path, config.active_window_right_double_click,  wlist[i].id);
+            set_action_str(window_middle_double_click, path, config.active_window_middle_double_click, wlist[i].id);
+            set_action_str(window_scroll_up,           path, config.active_window_scroll_up,           wlist[i].id);
+            set_action_str(window_scroll_down,         path, config.active_window_scroll_down,         wlist[i].id);
             window_fg_color = config.active_window_fg_color;
             window_bg_color = config.active_window_bg_color;
             window_ul_color = config.active_window_ul_color;
@@ -411,8 +448,8 @@ void output(struct window_props* wlist, int n, Window active_window, long curren
         char* padded_name = pad_spaces(window_name);
 
         print_polybar_str(padded_name, window_fg_color, window_bg_color, window_ul_color, window_font,
-                          window_left_click, window_middle_click, window_right_click,
-                          window_scroll_up, window_scroll_down);
+                          window_left_click, window_middle_click, window_right_click, window_scroll_up, window_scroll_down,
+                          window_left_double_click, window_middle_double_click, window_right_double_click);
 
         window_count++;
         free(window_nickname);
@@ -423,14 +460,14 @@ void output(struct window_props* wlist, int n, Window active_window, long curren
 
     if (window_count == 0) {
         print_polybar_str(config.empty_desktop_string, config.empty_desktop_fg_color, config.empty_desktop_bg_color, config.empty_desktop_ul_color,
-                          config.empty_desktop_font, "none", "none", "none", "none", "none");
+                          config.empty_desktop_font, "none", "none", "none", "none", "none", "none", "none", "none");
     }
 
     if (window_count > config.max_windows) {
         char overflow_string[20];
         snprintf(overflow_string, 20, "(+%d)", window_count - config.max_windows);
         print_polybar_str(overflow_string, config.overflow_fg_color, config.overflow_bg_color, config.overflow_ul_color,
-                          config.overflow_font, "none", "none", "none", "none", "none");
+                          config.overflow_font, "none", "none", "none", "none", "none", "none", "none", "none");
     }
 
     printf("\n");
