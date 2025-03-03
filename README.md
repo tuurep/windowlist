@@ -55,9 +55,9 @@ All options are detailed below:
             <td>Criteria to sort the list of windows.</td>
             <td>
                 <ul>
-                    <li><code>"none"</code>: no sort, WM client list order (default)</li>
                     <li><code>"position"</code>: sort based on horizontal position on the screen</li>
                     <li><code>"application"</code>: sort alphabetically based on the application class</li>
+                    <li><code>"none"</code>: no sort, WM client list order (default)</li>
                 <ul>
             </td>
         </tr>
@@ -144,8 +144,8 @@ All options are detailed below:
             <td>Right click is an example that has the same action regardless of active status, by default.</td>
             <td>
                 <ul>
-                    <li><code>"none"</code>: no action</li>
                     <li>script name (default: <code>"close"</code>)</li>
+                    <li><code>"none"</code>: no action</li>
                 </ul>
             </td>
         </tr>
@@ -168,8 +168,8 @@ All options are detailed below:
             Note: for double-click actions, make sure to set <code>double-click-interval</code> (ms) to your preference in Polybar's <code>config.ini</code>.</td>
             <td>
                 <ul>
-                    <li><code>"none"</code>: no action (default)</li>
                     <li>script name</li>
+                    <li><code>"none"</code>: no action (default)</li>
                 </ul>
             </td>
         </tr>
@@ -189,8 +189,8 @@ All options are detailed below:
             </td>
             <td>
                 <ul>
-                    <li><code>"none"</code>: use fg color defined in your <code>config.ini</code> (default)</li>
                     <li>hex color string</li>
+                    <li><code>"none"</code>: use fg color defined in your <code>config.ini</code> (default)</li>
                 </ul>
             </td>
         </tr>
@@ -209,8 +209,8 @@ All options are detailed below:
             </td>
             <td>
                 <ul>
-                    <li><code>"none"</code>: use fg color defined in your <code>config.ini</code></li>
                     <li>hex color string (default: <code>"#808080"</code>)</li>
+                    <li><code>"none"</code>: use fg color defined in your <code>config.ini</code></li>
                 </ul>
             </td>
         </tr>
@@ -219,8 +219,8 @@ All options are detailed below:
             <td>All of the foreground colors have a background color counterpart, e.g. <code>active_window_bg_color</code>.</td>
             <td>
                 <ul>
-                    <li><code>"none"</code>: no background color (default)</li>
                     <li>hex color string</li>
+                    <li><code>"none"</code>: no background color (default)</li>
                 </ul>
             </td>
         </tr>
@@ -230,8 +230,8 @@ All options are detailed below:
             Note that <code>line-size</code> must be set to 1 or higher in your Polybar <code>config.ini</code>, otherwise underline isn't visible.</td>
             <td>
                 <ul>
-                    <li><code>"none"</code>: no underline (default)</li>
                     <li>hex color string</li>
+                    <li><code>"none"</code>: no underline (default)</li>
                 </ul>
             </td>
         </tr>
