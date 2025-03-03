@@ -24,7 +24,10 @@ click-actions/close: click-actions/src/close.c click-actions/src/common.o
 	gcc $(CFLAGS) $(LDFLAGS) -o $@ $^
 
 config.toml: config-default.toml
-	cp config-default.toml config.toml
+	@if [ ! -f config.toml ]; then \
+		echo "Copying 'config-default.toml' -> 'config.toml'"; \
+		cp config-default.toml config.toml; \
+	fi
 
 clean:
 	rm -f main \
