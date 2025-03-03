@@ -154,11 +154,18 @@ All options are detailed below:
                 <code>active_window_middle_click</code><br>
                 <code>active_window_scroll_up</code><br>
                 <code>active_window_scroll_down</code><br>
+                <code>active_window_left_double_click</code><br>
+                <code>active_window_right_double_click</code><br>
+                <code>active_window_middle_double_click</code><br><br>
                 <code>inactive_window_middle_click</code><br>
                 <code>inactive_window_scroll_up</code><br>
                 <code>inactive_window_scroll_down</code><br>
+                <code>inactive_window_left_double_click</code><br>
+                <code>inactive_window_right_double_click</code><br>
+                <code>inactive_window_middle_double_click</code><br>
             </td>
-            <td>These are all the rest of the click actions that Polybar allows (TODO: doubleclick actions #33). They do nothing by default, but if you have an idea, see <a href="https://github.com/tuurep/windowlist?tab=readme-ov-file#scripting-click-actions">section about scripting</a>.</td>
+            <td>These are all the rest of the click actions that Polybar allows. They do nothing by default, but if you have an idea, see <a href="https://github.com/tuurep/windowlist?tab=readme-ov-file#scripting-click-actions">section about scripting</a>.<br><br>
+            Note: for double-click actions, make sure to set <code>double-click-interval</code> (ms) to your preference in Polybar's <code>config.ini</code>.</td>
             <td>
                 <ul>
                     <li><code>"none"</code>: no action (default)</li>
