@@ -496,10 +496,23 @@ int main(int argc, char* argv[]) {
     toml_table_t* tbl = parse_config("config.toml", path);
 
     int wlist_len;
-    struct window_props* wlist = generate_window_list(d, &wlist_len);
+    struct wprops* wlist = generate_window_list(d, &wlist_len);
+
+    if (!strcmp(config.sort_by, "application")) {
+        qsort(wlist, wlist_len, sizeof(struct wprops), compare_window_class);
+    }
+    if (!strcmp(config.sort_by, "position")) {
+        qsort(wlist, wlist_len, sizeof(struct wprops), compare_position);
+    }
 
     int prev_wlist_len = 0;
-    struct window_props* prev_wlist = NULL;
+    struct wprops* prev_wlist = NULL;
+
+    // Get events for individual windows' property changes,
+    // to know when a window's title (WM_NAME) changes
+    if (!strcmp(config.name, "title")) {
+        configure_windows_notify(d, prev_wlist, prev_wlist_len, wlist, wlist_len);
+    }
 
     Window active_window = get_active_window(d);
     long current_desktop_id = get_desktop_id(d, root, "_NET_CURRENT_DESKTOP");
@@ -531,9 +544,14 @@ int main(int argc, char* argv[]) {
 
             wlist = generate_window_list(d, &wlist_len);
 
-            // Get events for individual windows' property changes,
-            // to know when a window's title (WM_NAME) changes
-            if (!strcmp(config.sort_by, "name")) {
+            if (!strcmp(config.sort_by, "application")) {
+                qsort(wlist, wlist_len, sizeof(struct wprops), compare_window_class);
+            }
+            if (!strcmp(config.sort_by, "position")) {
+                qsort(wlist, wlist_len, sizeof(struct wprops), compare_position);
+            }
+
+            if (!strcmp(config.name, "title")) {
                 configure_windows_notify(d, prev_wlist, prev_wlist_len, wlist, wlist_len);
             }
 
