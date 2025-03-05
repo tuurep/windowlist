@@ -158,8 +158,8 @@ void uppercase(char* str) {
 }
 
 int compare_window_class(const void* v1, const void* v2) {
-    const struct window_props* p1 = v1;
-    const struct window_props* p2 = v2;
+    const struct wprops* p1 = v1;
+    const struct wprops* p2 = v2;
     lowercase(p1->class);
     lowercase(p2->class);
     return strcmp(p1->class, p2->class);
@@ -168,8 +168,8 @@ int compare_window_class(const void* v1, const void* v2) {
 int compare_position(const void* v1, const void* v2) {
     // Sort wlist by horizontal position on screen
     // If tied, vertical position decides (higher first)
-    const struct window_props* p1 = v1;
-    const struct window_props* p2 = v2;
+    const struct wprops* p1 = v1;
+    const struct wprops* p2 = v2;
     if (p1->x < p2->x) return -1;
     if (p1->x > p2->x) return 1;
     if (p1->y < p2->y) return -1;
@@ -335,18 +335,18 @@ void set_action_str(char* str, char* path, char* option, Window wid) {
     snprintf(str, MAX_STR_LEN, "%s/click-actions/%s 0x%lx", path, option, wid);
 }
 
-void output(struct window_props* wlist, int n, Window active_window, long current_desktop_id, char* path) {
+void output(struct wprops* wlist, int wlist_len, Window active_window, long current_desktop_id, char* path) {
 
     if (!strcmp(config.sort_by, "application")) {
-        qsort(wlist, n, sizeof(struct window_props), compare_window_class);
+        qsort(wlist, wlist_len, sizeof(struct wprops), compare_window_class);
     }
     if (!strcmp(config.sort_by, "position")) {
-        qsort(wlist, n, sizeof(struct window_props), compare_position);
+        qsort(wlist, wlist_len, sizeof(struct wprops), compare_position);
     }
 
     int window_count = 0;
 
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < wlist_len; i++) {
 
         // Don't show 'omnipresent' windows, which have desktop ID -1
         // otherwise e.g. 'polybar' shows in the list
@@ -473,8 +473,8 @@ void output(struct window_props* wlist, int n, Window active_window, long curren
     printf("\n");
 }
 
-void configure_windows_notify(Display* d, struct window_props* prev_wlist, int prev_wlist_len, struct window_props* wlist, int n) {
-    for (int i = 0; i < n; i++) {
+void configure_windows_notify(Display* d, struct wprops* prev_wlist, int prev_wlist_len, struct wprops* wlist, int wlist_len) {
+    for (int i = 0; i < wlist_len; i++) {
         bool found = false;
         for (int j = 0; j < prev_wlist_len; j++) {
             if (wlist[i].id == prev_wlist[j].id) {

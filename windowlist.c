@@ -237,7 +237,7 @@ int error_catcher(Display* d, XErrorEvent* e) {
     return EXIT_FAILURE;
 }
 
-struct window_props* generate_window_list(Display* d, int* window_list_size) {
+struct wprops* generate_window_list(Display* d, int* window_list_size) {
     Window* client_list;
     unsigned long client_list_size;
 
@@ -246,14 +246,14 @@ struct window_props* generate_window_list(Display* d, int* window_list_size) {
     }
 
     *window_list_size = client_list_size / sizeof(Window);
-    struct window_props* window_list = malloc(*window_list_size * sizeof(struct window_props));
+    struct wprops* window_list = malloc(*window_list_size * sizeof(struct wprops));
 
     XSetErrorHandler(error_catcher);
 
     // Populate the list
     for (int i = 0; i < *window_list_size; i++) {
         Window w = client_list[i];
-        struct window_props wp;
+        struct wprops wp;
 
         wp.id = w;
         wp.class = get_window_class(d, w);
