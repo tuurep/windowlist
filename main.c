@@ -510,9 +510,7 @@ int main(int argc, char* argv[]) {
 
     // Get events for individual windows' property changes,
     // to know when a window's title (WM_NAME) changes
-    if (!strcmp(config.name, "title")) {
-        configure_windows_notify(d, prev_wlist, prev_wlist_len, wlist, wlist_len);
-    }
+    configure_windows_notify(d, prev_wlist, prev_wlist_len, wlist, wlist_len);
 
     Window active_window = get_active_window(d);
     long current_desktop_id = get_desktop_id(d, root, "_NET_CURRENT_DESKTOP");
@@ -551,9 +549,7 @@ int main(int argc, char* argv[]) {
                 qsort(wlist, wlist_len, sizeof(struct wprops), compare_position);
             }
 
-            if (!strcmp(config.name, "title")) {
-                configure_windows_notify(d, prev_wlist, prev_wlist_len, wlist, wlist_len);
-            }
+            configure_windows_notify(d, prev_wlist, prev_wlist_len, wlist, wlist_len);
 
             current_desktop_id = get_desktop_id(d, root, "_NET_CURRENT_DESKTOP");
             active_window = get_active_window(d);
