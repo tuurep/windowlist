@@ -70,9 +70,9 @@ struct configuration {
     toml_table_t* window_nicknames;
 } config;
 
-toml_table_t* parse_config(char* filename, char* path) {
+toml_table_t* parse_config(char* filename) {
     char config_path[MAX_STR_LEN];
-    snprintf(config_path, MAX_STR_LEN, "%s/%s", path, filename);
+    snprintf(config_path, MAX_STR_LEN, "%s/%s", COMPILE_DIR, filename);
 
     char errbuf[MAX_STR_LEN];
 
@@ -326,16 +326,16 @@ void print_polybar_str(char* label, char* fg_color, char* bg_color, char* ul_col
     }
 }
 
-void set_action_str(char* str, char* path, char* option, Window wid) {
+void set_action_str(char* str, char* option, Window wid) {
     if (is_unused(option)) {
         strcpy(str, "none");
         return;
     }
 
-    snprintf(str, MAX_STR_LEN, "%s/click-actions/%s 0x%lx", path, option, wid);
+    snprintf(str, MAX_STR_LEN, "%s/click-actions/%s 0x%lx", COMPILE_DIR, option, wid);
 }
 
-void output(struct wprops* wlist, int wlist_len, Window active_window, long current_desktop_id, char* path) {
+void output(struct wprops* wlist, int wlist_len, Window active_window, long current_desktop_id) {
 
     if (!strcmp(config.sort_by, "application")) {
         qsort(wlist, wlist_len, sizeof(struct wprops), compare_window_class);
@@ -395,27 +395,27 @@ void output(struct wprops* wlist, int wlist_len, Window active_window, long curr
         int window_font;
 
         if (wlist[i].id != active_window) {
-            set_action_str(window_left_click,          path, config.inactive_window_left_click,          wlist[i].id);
-            set_action_str(window_right_click,         path, config.inactive_window_right_click,         wlist[i].id);
-            set_action_str(window_middle_click,        path, config.inactive_window_middle_click,        wlist[i].id);
-            set_action_str(window_left_double_click,   path, config.inactive_window_left_double_click,   wlist[i].id);
-            set_action_str(window_right_double_click,  path, config.inactive_window_right_double_click,  wlist[i].id);
-            set_action_str(window_middle_double_click, path, config.inactive_window_middle_double_click, wlist[i].id);
-            set_action_str(window_scroll_up,           path, config.inactive_window_scroll_up,           wlist[i].id);
-            set_action_str(window_scroll_down,         path, config.inactive_window_scroll_down,         wlist[i].id);
+            set_action_str(window_left_click,          config.inactive_window_left_click,          wlist[i].id);
+            set_action_str(window_right_click,         config.inactive_window_right_click,         wlist[i].id);
+            set_action_str(window_middle_click,        config.inactive_window_middle_click,        wlist[i].id);
+            set_action_str(window_left_double_click,   config.inactive_window_left_double_click,   wlist[i].id);
+            set_action_str(window_right_double_click,  config.inactive_window_right_double_click,  wlist[i].id);
+            set_action_str(window_middle_double_click, config.inactive_window_middle_double_click, wlist[i].id);
+            set_action_str(window_scroll_up,           config.inactive_window_scroll_up,           wlist[i].id);
+            set_action_str(window_scroll_down,         config.inactive_window_scroll_down,         wlist[i].id);
             window_fg_color = config.inactive_window_fg_color;
             window_bg_color = config.inactive_window_bg_color;
             window_ul_color = config.inactive_window_ul_color;
             window_font = config.inactive_window_font;
         } else {
-            set_action_str(window_left_click,          path, config.active_window_left_click,          wlist[i].id);
-            set_action_str(window_right_click,         path, config.active_window_right_click,         wlist[i].id);
-            set_action_str(window_middle_click,        path, config.active_window_middle_click,        wlist[i].id);
-            set_action_str(window_left_double_click,   path, config.active_window_left_double_click,   wlist[i].id);
-            set_action_str(window_right_double_click,  path, config.active_window_right_double_click,  wlist[i].id);
-            set_action_str(window_middle_double_click, path, config.active_window_middle_double_click, wlist[i].id);
-            set_action_str(window_scroll_up,           path, config.active_window_scroll_up,           wlist[i].id);
-            set_action_str(window_scroll_down,         path, config.active_window_scroll_down,         wlist[i].id);
+            set_action_str(window_left_click,          config.active_window_left_click,          wlist[i].id);
+            set_action_str(window_right_click,         config.active_window_right_click,         wlist[i].id);
+            set_action_str(window_middle_click,        config.active_window_middle_click,        wlist[i].id);
+            set_action_str(window_left_double_click,   config.active_window_left_double_click,   wlist[i].id);
+            set_action_str(window_right_double_click,  config.active_window_right_double_click,  wlist[i].id);
+            set_action_str(window_middle_double_click, config.active_window_middle_double_click, wlist[i].id);
+            set_action_str(window_scroll_up,           config.active_window_scroll_up,           wlist[i].id);
+            set_action_str(window_scroll_down,         config.active_window_scroll_down,         wlist[i].id);
             window_fg_color = config.active_window_fg_color;
             window_bg_color = config.active_window_bg_color;
             window_ul_color = config.active_window_ul_color;
@@ -492,8 +492,7 @@ int main(int argc, char* argv[]) {
     Display* d = XOpenDisplay(NULL);
     Window root = DefaultRootWindow(d);
 
-    char* path = dirname(argv[0]);
-    toml_table_t* tbl = parse_config("config.toml", path);
+    toml_table_t* tbl = parse_config("config.toml");
 
     int wlist_len;
     struct wprops* wlist = generate_window_list(d, &wlist_len);
@@ -516,7 +515,7 @@ int main(int argc, char* argv[]) {
     long current_desktop_id = get_desktop_id(d, root, "_NET_CURRENT_DESKTOP");
 
     // Initialize module on polybar launch
-    output(wlist, wlist_len, active_window, current_desktop_id, path);
+    output(wlist, wlist_len, active_window, current_desktop_id);
 
     // Receive PropertyNotify for changes in client list and active window change
     long event_mask = PropertyChangeMask;
@@ -554,7 +553,7 @@ int main(int argc, char* argv[]) {
             current_desktop_id = get_desktop_id(d, root, "_NET_CURRENT_DESKTOP");
             active_window = get_active_window(d);
 
-            output(wlist, wlist_len, active_window, current_desktop_id, path);
+            output(wlist, wlist_len, active_window, current_desktop_id);
         }
     }
     free(wlist);

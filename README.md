@@ -18,9 +18,15 @@ Windowlist has been fully rewritten in C using the relevant parts of the source 
 
 ## Installation
 
-Project directory should be in `~/.config/polybar/scripts/`
+You can either clone the whole repo to `~/.config/polybar/scripts/` and run `make`, or if you want more control, use `make install DEST=~/installation/path/executable-name` to put the executable in a path of your choosing.
 
-In `~/.config/polybar/scripts/windowlist/` run `make`
+More detail on both methods:
+
+### Using `make`
+
+1. Put the repo in `~/.config/polybar/scripts/`
+2. Go to `~/.config/polybar/scripts/windowlist/`
+3. Run `make`
 
 Add module in `~/.config/polybar/config.ini`:
 
@@ -32,6 +38,28 @@ tail = true
 ```
 
 Add module `windowlist` in any of `modules-left`, `modules-center` or `modules-right`
+
+### Using `make install` with custom executable path
+
+Let's say you've cloned this repo in `~/repos/windowlist`, example usage:
+
+1. Go to `~/repos/windowlist/`
+2. Run `make install DEST=~/.config/polybar/scripts/windowlist`
+    - (Note: here `windowlist` is the name of the executable, not the directory)
+
+Now the module would look like this in Polybar's `config.ini`:
+
+```ini
+[module/windowlist]
+type = custom/script
+exec = ~/.config/polybar/scripts/windowlist 2> /dev/null
+tail = true
+```
+
+Alternatively, install to `~/.local/bin`:
+
+- `make install DEST=~/.local/bin/windowlist`
+- Now the `exec` would look like: `exec = windowlist 2> /dev/null`
 
 ## Configuration
 
