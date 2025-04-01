@@ -6,7 +6,7 @@ LDFLAGS = -lX11
 all: main click-actions/raise click-actions/minimize click-actions/close config.toml
 
 main: main.c windowlist.o windowlist.h toml-c.h
-	gcc -DCOMPILE_DIR=\"$(shell pwd)\" $(CFLAGS) $(LDFLAGS) -o main main.c windowlist.o
+	gcc -DCOMPILE_DIR=\"$(shell pwd)\" $(CFLAGS) -o main main.c windowlist.o $(LDFLAGS)
 
 windowlist.o: windowlist.c
 	gcc $(CFLAGS) -c -o $@ $^
@@ -15,13 +15,13 @@ click-actions/src/common.o: click-actions/src/common.c
 	gcc $(CFLAGS) -c -o $@ $^
 
 click-actions/raise: click-actions/src/raise.c click-actions/src/common.o windowlist.o
-	gcc $(CFLAGS) $(LDFLAGS) -o $@ $^
+	gcc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 click-actions/minimize: click-actions/src/minimize.c click-actions/src/common.o
-	gcc $(CFLAGS) $(LDFLAGS) -o $@ $^
+	gcc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 click-actions/close: click-actions/src/close.c click-actions/src/common.o
-	gcc $(CFLAGS) $(LDFLAGS) -o $@ $^
+	gcc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 config.toml: config-default.toml
 	@if [ ! -f config.toml ]; then \
