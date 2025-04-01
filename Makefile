@@ -15,13 +15,13 @@ click-actions/src/common.o: click-actions/src/common.c
 	gcc $(CFLAGS) -c -o $@ $^
 
 click-actions/raise: click-actions/src/raise.c click-actions/src/common.o windowlist.o
-	gcc $(CFLAGS) $(LDFLAGS) -o $@ $^
+	gcc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 click-actions/minimize: click-actions/src/minimize.c click-actions/src/common.o
-	gcc $(CFLAGS) $(LDFLAGS) -o $@ $^
+	gcc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 click-actions/close: click-actions/src/close.c click-actions/src/common.o
-	gcc $(CFLAGS) $(LDFLAGS) -o $@ $^
+	gcc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 config.toml: config-default.toml
 	@if [ ! -f config.toml ]; then \
