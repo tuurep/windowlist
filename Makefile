@@ -6,7 +6,7 @@ LDFLAGS = -lX11
 all: main click-actions/raise click-actions/minimize click-actions/close config.toml
 
 main: main.c windowlist.o windowlist.h toml-c.h
-	gcc -DCOMPILE_DIR=\"$(shell pwd)\" $(CFLAGS) $(LDFLAGS) -o main main.c windowlist.o
+	gcc -DCOMPILE_DIR=\"$(shell pwd)\" $(CFLAGS) -o main main.c windowlist.o $(LDFLAGS)
 
 windowlist.o: windowlist.c
 	gcc $(CFLAGS) -c -o $@ $^
