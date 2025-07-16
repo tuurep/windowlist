@@ -3,10 +3,10 @@ LDFLAGS = -lX11
 
 .PHONY: all install clean
 
-all: main click-actions/raise click-actions/minimize click-actions/close config.toml
+all: main click-actions/raise click-actions/minimize click-actions/close
 
 main: main.c windowlist.o windowlist.h toml-c.h
-	gcc -DCOMPILE_DIR=\"$(shell pwd)\" $(CFLAGS) -o main main.c windowlist.o $(LDFLAGS)
+	gcc -o main main.c windowlist.o $(LDFLAGS)
 
 windowlist.o: windowlist.c
 	gcc $(CFLAGS) -c -o $@ $^
@@ -22,12 +22,6 @@ click-actions/minimize: click-actions/src/minimize.c click-actions/src/common.o
 
 click-actions/close: click-actions/src/close.c click-actions/src/common.o
 	gcc $(CFLAGS) -o $@ $^ $(LDFLAGS)
-
-config.toml: config-default.toml
-	@if [ ! -f config.toml ]; then \
-		echo "Copying 'config-default.toml' -> 'config.toml'"; \
-		cp config-default.toml config.toml; \
-	fi
 
 install: all
 	@if [ -z "$(DEST)" ]; then \

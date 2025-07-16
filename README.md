@@ -63,9 +63,9 @@ Alternatively, install to `~/.local/bin`:
 
 ## Configuration
 
-Windowlist can be configured in `config.toml` in the root of the project.
+TODO: Explain `env-CONFIGPATH`
 
-If `config.toml` doesn't already exist, it will be created as a copy of `config-default.toml` when running `make`. It will not be overwritten if it exists.
+Windowlist can be configured in ~~`config.toml` in the root of the project.~~
 
 Keys can be removed or commented out from `config.toml`, they will fall back to the default values in that case.
 
@@ -306,7 +306,7 @@ window_id="$1"
 
 Set the script as executable: `chmod +x click-actions/foo.sh`
 
-Then in `config.toml`:
+Then in ~~`config.toml`~~ (todo: reword):
 
 ```toml
 active_window_middle_click = "foo.sh"
