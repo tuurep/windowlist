@@ -18,56 +18,15 @@ Windowlist has been fully rewritten in C using the relevant parts of the source 
 
 ## Installation
 
-You can either clone the whole repo to `~/.config/polybar/scripts/` and run `make`, or if you want more control, use `make install DEST=~/installation/path/executable-name` to put the executable in a path of your choosing.
-
-More detail on both methods:
-
-### Using `make`
-
-1. Put the repo in `~/.config/polybar/scripts/`
-2. Go to `~/.config/polybar/scripts/windowlist/`
-3. Run `make`
-
-Add module in `~/.config/polybar/config.ini`:
-
-```ini
-[module/windowlist]
-type = custom/script
-exec = ~/.config/polybar/scripts/windowlist/main 2> /dev/null
-tail = true
-```
-
-Add module `windowlist` in any of `modules-left`, `modules-center` or `modules-right`
-
-### Using `make install` with custom executable path
-
-Let's say you've cloned this repo in `~/repos/windowlist`, example usage:
-
-1. Go to `~/repos/windowlist/`
-2. Run `make install DEST=~/.config/polybar/scripts/windowlist`
-    - (Note: here `windowlist` is the name of the executable, not the directory)
-
-Now the module would look like this in Polybar's `config.ini`:
-
-```ini
-[module/windowlist]
-type = custom/script
-exec = ~/.config/polybar/scripts/windowlist 2> /dev/null
-tail = true
-```
-
-Alternatively, install to `~/.local/bin`:
-
-- `make install DEST=~/.local/bin/windowlist`
-- Now the `exec` would look like: `exec = windowlist 2> /dev/null`
+TODO:
+- New usage of `make install`
+- Deprecate cloning to `~/.config/polybar/scripts/`
 
 ## Configuration
 
-TODO: Explain `env-CONFIGPATH`
-
-Windowlist can be configured in ~~`config.toml` in the root of the project.~~
-
-Keys can be removed or commented out from `config.toml`, they will fall back to the default values in that case.
+TODO:
+- Explain default path `~/.config/polybar/windowlist.toml`
+- Explain `env-CONFIGPATH`
 
 All options are detailed below:
 
@@ -144,10 +103,12 @@ All options are detailed below:
             <td>
                 <code>active_window_left_click</code><br>
             </td>
-            <td>Click actions for window names can be set as <code>"raise"</code>, <code>"minimize"</code> or <code>"close"</code>, or a custom script/program in the <code>click-actions</code> directory. Window currently in focus (active) and unfocused windows (inactive) are configurable separately.</td>
+            <td>
+                TODO: New explanation, using <code>$PATH</code>
+            </td>
             <td>
                 <ul>
-                    <li>script name (default: <code>"minimize"</code>)</li>
+                    <li>script path (default: <code>"windowlist-minimize"</code>)</li>
                     <li><code>"none"</code>: no action</li>
                 </ul>
             </td>
@@ -159,7 +120,7 @@ All options are detailed below:
             <td>This is the main reason inactive window click actions can have a separate click action: it only makes sense to raise a window when it's not the active window.</td>
             <td>
                 <ul>
-                    <li>script name (default: <code>"raise"</code>)</li>
+                    <li>script path (default: <code>"windowlist-raise"</code>)</li>
                     <li><code>"none"</code>: no action</li>
                 </ul>
             </td>
@@ -172,7 +133,7 @@ All options are detailed below:
             <td>Right click is an example that has the same action regardless of active status, by default.</td>
             <td>
                 <ul>
-                    <li>script name (default: <code>"close"</code>)</li>
+                    <li>script path (default: <code>"windowlist-close"</code>)</li>
                     <li><code>"none"</code>: no action</li>
                 </ul>
             </td>
@@ -196,7 +157,7 @@ All options are detailed below:
             Note: for double-click actions, make sure to set <code>double-click-interval</code> (ms) to your preference in Polybar's <code>config.ini</code>.</td>
             <td>
                 <ul>
-                    <li>script name</li>
+                    <li>script path</li>
                     <li><code>"none"</code>: no action (default)</li>
                 </ul>
             </td>
@@ -290,29 +251,11 @@ All options are detailed below:
 
 ### Scripting click actions
 
-The most convenient way is to write a shell script in the `click-actions` directory. Any language could be used, though. There are three "default" actions as small C programs: `raise`, `minimize` and `close`.
+TODO: new explanation, using `$PATH`
 
-You can write a new action as a script such as:
+Window id is always given as ~~arg `$1`~~ (Technically it's *last* argument? This actually matters.)
 
-`click-actions/foo.sh`
-
-```bash
-#!/bin/sh
-
-window_id="$1"
-
-# Do something with the window id of the window that has been clicked/scrolled on
-```
-
-Set the script as executable: `chmod +x click-actions/foo.sh`
-
-Then in ~~`config.toml`~~ (todo: reword):
-
-```toml
-active_window_middle_click = "foo.sh"
-```
-
-Window id is always given as arg `$1`. Tools I know that could be used to make something happen with a window id:
+Tools I know that could be used to make something happen with a window id:
 
 * [wmctrl](https://github.com/Conservatory/wmctrl)
 * [wmutils](https://github.com/wmutils/core)

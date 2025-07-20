@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
-#include "common.h"
+#include "actions-common.h"
 
 int client_msg(Display* d, Window w, char* msg, long desktop) {
     XEvent e;

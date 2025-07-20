@@ -1,5 +1,1 @@
-*.o
-main
-click-actions/raise
-click-actions/minimize
-click-actions/close
+build

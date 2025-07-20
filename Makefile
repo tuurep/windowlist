@@ -1,48 +1,61 @@
 CFLAGS = -g -O2 -Wall
 LDFLAGS = -lX11
 
-.PHONY: all install clean
+# Todo: BINDIR
 
-all: main click-actions/raise click-actions/minimize click-actions/close
+BINS = build/windowlist \
+       build/windowlist-close \
+       build/windowlist-minimize \
+       build/windowlist-raise
 
-main: main.c windowlist.o windowlist.h toml-c.h
-	gcc -o main main.c windowlist.o $(LDFLAGS)
+.PHONY: all clean # install uninstall
 
-windowlist.o: windowlist.c
-	gcc $(CFLAGS) -c -o $@ $^
+all: $(BINS)
 
-click-actions/src/common.o: click-actions/src/common.c
-	gcc $(CFLAGS) -c -o $@ $^
+# Ensure build dir is created before it's needed
+build/:
+	mkdir -p build
 
-click-actions/raise: click-actions/src/raise.c click-actions/src/common.o windowlist.o
+build/windowlist: src/windowlist.c \
+		  build/xlib-utils.o \
+		  src/xlib-utils.h \
+		  src/toml-c.h | build/
+
+	gcc -o build/windowlist src/windowlist.c build/xlib-utils.o $(LDFLAGS)
+
+build/xlib-utils.o: src/xlib-utils.c \
+		    src/xlib-utils.h | build/
+
+	gcc $(CFLAGS) -c -o $@ $<
+
+build/actions-common.o: src/click-actions/actions-common.c \
+			src/click-actions/actions-common.h | build/
+
+	gcc $(CFLAGS) -c -o $@ $<
+
+build/windowlist-raise: src/click-actions/windowlist-raise.c \
+			build/actions-common.o \
+			src/click-actions/actions-common.h \
+			build/xlib-utils.o \
+			src/xlib-utils.h | build/
+
 	gcc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-click-actions/minimize: click-actions/src/minimize.c click-actions/src/common.o
+build/windowlist-minimize: src/click-actions/windowlist-minimize.c \
+			   build/actions-common.o \
+			   src/click-actions/actions-common.h | build/
+
 	gcc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-click-actions/close: click-actions/src/close.c click-actions/src/common.o
+build/windowlist-close: src/click-actions/windowlist-close.c \
+			build/actions-common.o \
+			src/click-actions/actions-common.h | build/
+
 	gcc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-install: all
-	@if [ -z "$(DEST)" ]; then \
-		echo    "Usage: make install DEST=/path/to/executable"; \
-		echo -e "       (Warning: overwrites target)\n"; \
-		exit 1; \
-	fi
-	@DEST_EXPANDED=$(shell eval echo $(DEST)); \
-	if [ -d "$$DEST_EXPANDED" ]; then \
-		echo    "'$$DEST_EXPANDED' is a directory!"; \
-		echo -e "Provide path to executable, including filename.\n"; \
-		exit 1; \
-	fi; \
-	echo "Installing 'main' as '$$DEST_EXPANDED'"; \
-	mkdir -p "$$(dirname $$DEST_EXPANDED)"; \
-	install -m 755 main "$$DEST_EXPANDED"
+# Todo: install to BINDIR
+
+# Todo: uninstall from BINDIR
 
 clean:
-	rm -f main \
-	      windowlist.o \
-	      click-actions/src/common.o \
-	      click-actions/raise \
-	      click-actions/minimize \
-	      click-actions/close
+	rm -rf build

@@ -7,7 +7,7 @@
 #include <ctype.h>
 #include <X11/Xlib.h>
 #include "toml-c.h"
-#include "windowlist.h"
+#include "xlib-utils.h"
 
 #define MAX_STR_LEN 256
 
@@ -164,8 +164,8 @@ toml_table_t* parse_config() {
     config.empty_desktop_string = toml_string_or_default(tbl, "empty_desktop_string", "");
     config.separator_string = toml_string_or_default(tbl, "separator_string", "·");
 
-    config.active_window_left_click = toml_string_or_default(tbl, "active_window_left_click", "minimize");
-    config.active_window_right_click = toml_string_or_default(tbl, "active_window_right_click", "close");
+    config.active_window_left_click = toml_string_or_default(tbl, "active_window_left_click", "windowlist-minimize");
+    config.active_window_right_click = toml_string_or_default(tbl, "active_window_right_click", "windowlist-close");
     config.active_window_middle_click = toml_string_or_default(tbl, "active_window_middle_click", "none");
     config.active_window_left_double_click = toml_string_or_default(tbl, "active_window_left_double_click", "none");
     config.active_window_right_double_click = toml_string_or_default(tbl, "active_window_right_double_click", "none");
@@ -173,8 +173,8 @@ toml_table_t* parse_config() {
     config.active_window_scroll_up = toml_string_or_default(tbl, "active_window_scroll_up", "none");
     config.active_window_scroll_down = toml_string_or_default(tbl, "active_window_scroll_down", "none");
 
-    config.inactive_window_left_click = toml_string_or_default(tbl, "inactive_window_left_click", "raise");
-    config.inactive_window_right_click = toml_string_or_default(tbl, "inactive_window_right_click", "close");
+    config.inactive_window_left_click = toml_string_or_default(tbl, "inactive_window_left_click", "windowlist-raise");
+    config.inactive_window_right_click = toml_string_or_default(tbl, "inactive_window_right_click", "windowlist-close");
     config.inactive_window_middle_click = toml_string_or_default(tbl, "inactive_window_middle_click", "none");
     config.inactive_window_left_double_click = toml_string_or_default(tbl, "inactive_window_left_double_click", "none");
     config.inactive_window_right_double_click = toml_string_or_default(tbl, "inactive_window_right_double_click", "none");
