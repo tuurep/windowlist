@@ -395,13 +395,12 @@ void print_polybar_str(char* label, char* fg_color, char* bg_color, char* ul_col
     }
 }
 
-void set_action_str(char* str, char* option, Window wid) {
-    if (is_unused(option)) {
+void set_action_str(char* str, char* script_option, Window wid) {
+    if (is_unused(script_option)) {
         strcpy(str, "none");
         return;
     }
-
-    snprintf(str, MAX_STR_LEN, "%s/click-actions/%s 0x%lx", COMPILE_DIR, option, wid);
+    snprintf(str, MAX_STR_LEN, "%s 0x%lx", script_option, wid);
 }
 
 void output(struct wprops* wlist, int wlist_len, Window active_window, long current_desktop_id) {
