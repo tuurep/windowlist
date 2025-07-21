@@ -1,14 +1,15 @@
 CFLAGS = -g -O2 -Wall
 LDFLAGS = -lX11
 
-# Todo: BINDIR
+# `make install` destination
+BINDIR ?= ~/.local/bin
 
 BINS = build/windowlist \
        build/windowlist-close \
        build/windowlist-minimize \
        build/windowlist-raise
 
-.PHONY: all clean # install uninstall
+.PHONY: all install uninstall clean
 
 all: $(BINS)
 
@@ -53,9 +54,27 @@ build/windowlist-close: src/click-actions/windowlist-close.c \
 
 	gcc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-# Todo: install to BINDIR
+install: all
+	@BINDIR_EXPANDED=$$(eval echo $(BINDIR)); \
+	mkdir -p "$$BINDIR_EXPANDED"; \
+	for bin in $(BINS); do \
+		TARGET=$$(basename $$bin); \
+		echo "Installing $$bin to $$BINDIR_EXPANDED/$$TARGET"; \
+		install -m 755 $$bin "$$BINDIR_EXPANDED/$$TARGET"; \
+	done		
 
-# Todo: uninstall from BINDIR
+uninstall:
+	@BINDIR_EXPANDED=$$(eval echo $(BINDIR)); \
+	for bin in $(BINS); do \
+		TARGET=$$(basename $$bin); \
+		FILE="$$BINDIR_EXPANDED/$$TARGET"; \
+		if [ -f "$$FILE" ]; then \
+			echo "Removing $$FILE"; \
+			rm -f "$$FILE"; \
+		else \
+			echo "Nothing to remove at $$FILE"; \
+		fi; \
+	done
 
 clean:
 	rm -rf build
