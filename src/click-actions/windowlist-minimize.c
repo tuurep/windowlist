@@ -5,9 +5,7 @@
 #include "actions-common.h"
 
 int main(int argc, char* argv[]) {
-    // Must take a window id as first argument
-    Window wid = str_to_wid(argv[1]);
-
+    Window wid = require_window_id(argc, argv);
     Display* d = XOpenDisplay(NULL);
     XIconifyWindow(d, wid, DefaultScreen(d));
     XCloseDisplay(d);

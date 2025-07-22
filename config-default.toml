@@ -1,3 +1,20 @@
+# ----------------- windowlist example config file -----------------------
+#
+# All keys are set to their default values.
+#
+# To use as a template for your config, copy to the default config path:
+#     ~/.config/polybar/windowlist.toml
+#
+# Or to a custom path, and set env-CONFIGPATH in Polybar's config.ini:
+#     [module/windowlist]
+#     ...
+#     env-CONFIGPATH = ~/my/custom/path/windowlist.toml
+#
+# You can remove or comment out any key, in that case the option will fall
+# back to the default value.
+#
+# ------------------------------------------------------------------------
+
 sort_by = "none" # "none" | "position" | "application"
 max_windows = 13
 all_desktops = false

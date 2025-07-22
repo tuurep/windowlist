@@ -6,9 +6,7 @@
 #include "../xlib-utils.h" // get_desktop_id()
 
 int main(int argc, char* argv[]) {
-    // Must take a window id as first argument
-    Window wid = str_to_wid(argv[1]);
-
+    Window wid = require_window_id(argc, argv);
     Display* d = XOpenDisplay(NULL);
     long desktop = get_desktop_id(d, wid, "_NET_WM_DESKTOP");
     client_msg(d, DefaultRootWindow(d), "_NET_CURRENT_DESKTOP", desktop);
