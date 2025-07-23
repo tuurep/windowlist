@@ -56,6 +56,12 @@ If you're using a custom `BINDIR` for installation, it needs to be specified:
 
 `BINDIR=~/my/custom/path make uninstall`
 
+### Packages
+
+For Arch Linux, there are packages available in the `AUR`:
+- [`windowlist`](https://aur.archlinux.org/packages/windowlist)
+- [`windowlist-git`](https://aur.archlinux.org/packages/windowlist-git)
+
 ## Configuration
 
 Windowlist uses a TOML file for configuration, allowing a lot of customizability.
