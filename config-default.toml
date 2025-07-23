@@ -1,3 +1,20 @@
+# ----------------- windowlist example config file -----------------------
+#
+# All keys are set to their default values.
+#
+# To use as a template for your config, copy to the default config path:
+#     ~/.config/polybar/windowlist.toml
+#
+# Or to a custom path, and set env-CONFIGPATH in Polybar's config.ini:
+#     [module/windowlist]
+#     ...
+#     env-CONFIGPATH = ~/my/custom/path/windowlist.toml
+#
+# You can remove or comment out any key, in that case the option will fall
+# back to the default value.
+#
+# ------------------------------------------------------------------------
+
 sort_by = "none" # "none" | "position" | "application"
 max_windows = 13
 all_desktops = false
@@ -10,8 +27,8 @@ name_padding = 1
 separator_string = "·"
 empty_desktop_string = ""
 
-active_window_left_click          = "minimize"
-active_window_right_click         = "close"
+active_window_left_click          = "windowlist-minimize"
+active_window_right_click         = "windowlist-close"
 active_window_middle_click        = "none"
 active_window_left_double_click   = "none"
 active_window_right_double_click  = "none"
@@ -19,8 +36,8 @@ active_window_middle_double_click = "none"
 active_window_scroll_up           = "none"
 active_window_scroll_down         = "none"
 
-inactive_window_left_click          = "raise"
-inactive_window_right_click         = "close"
+inactive_window_left_click          = "windowlist-raise"
+inactive_window_right_click         = "windowlist-close"
 inactive_window_middle_click        = "none"
 inactive_window_left_double_click   = "none"
 inactive_window_right_double_click  = "none"

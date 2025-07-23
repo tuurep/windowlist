@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
-#include "common.h"
+#include "actions-common.h"
 
 int client_msg(Display* d, Window w, char* msg, long desktop) {
     XEvent e;
@@ -35,8 +35,16 @@ int client_msg(Display* d, Window w, char* msg, long desktop) {
 Window str_to_wid(char* str) {
     unsigned long wid;
     if (sscanf(str, "0x%lx", &wid) != 1) {
-        fputs("Cannot convert argument to number.\n", stderr);
-        return EXIT_FAILURE;
+        return (Window) 0; // Failure to convert: return falsy
     }
     return (Window) wid;
+}
+
+Window require_window_id(int argc, char* argv[]) {
+    Window wid;
+    if (argc < 2 || ! (wid = str_to_wid(argv[1]))) {
+        fprintf(stderr, "Usage: %s <window-id>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+    return wid;
 }

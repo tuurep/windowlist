@@ -1,13 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <wordexp.h>
+#include <unistd.h>
 #include <string.h>
 #include <libgen.h>
 #include <ctype.h>
 #include <X11/Xlib.h>
 #include "toml-c.h"
-#include "windowlist.h"
+#include "xlib-utils.h"
 
-#define MAX_STR_LEN 200
+#define MAX_STR_LEN 256
 
 struct configuration {
     char* sort_by;
@@ -70,77 +72,144 @@ struct configuration {
     toml_table_t* window_nicknames;
 } config;
 
-toml_table_t* parse_config(char* filename) {
-    char config_path[MAX_STR_LEN];
-    snprintf(config_path, MAX_STR_LEN, "%s/%s", COMPILE_DIR, filename);
+char* toml_string_or_default(toml_table_t* tbl, char* key, char* fallback) {
+    if (!tbl) return fallback;
+    toml_value_t val = toml_table_string(tbl, key);
+    return val.ok ? val.u.s : fallback;
+}
 
-    char errbuf[MAX_STR_LEN];
+int toml_int_or_default(toml_table_t* tbl, char* key, int fallback) {
+    if (!tbl) return fallback;
+    toml_value_t val = toml_table_int(tbl, key);
+    return val.ok ? val.u.i : fallback;
+}
 
-    FILE* fp = fopen(config_path, "r");
-    toml_table_t* tbl = toml_parse_file(fp, errbuf, sizeof(errbuf));
-    fclose(fp);
+bool toml_bool_or_default(toml_table_t* tbl, char* key, bool fallback) {
+    if (!tbl) return fallback;
+    toml_value_t val = toml_table_bool(tbl, key);
+    return val.ok ? val.u.b : fallback;
+}
 
-    toml_value_t opt;
+char* expand_path(char* path) {
+    // Expand for example `~` in path
 
-    opt = toml_table_string(tbl, "sort_by");    config.sort_by      = opt.ok ? opt.u.s : "none";
-    opt = toml_table_int(tbl, "max_windows");   config.max_windows  = opt.ok ? opt.u.i : 13;
-    opt = toml_table_bool(tbl, "all_desktops"); config.all_desktops = opt.ok ? opt.u.b : false;
+    if (!path) {
+        return NULL;
+    }
 
-    opt = toml_table_string(tbl, "name");         config.name            = opt.ok ? opt.u.s : "class";
-    opt = toml_table_string(tbl, "name_case");    config.name_case       = opt.ok ? opt.u.s : "lowercase";
-    opt = toml_table_int(tbl, "name_max_length"); config.name_max_length = opt.ok ? opt.u.i : 30;
-    opt = toml_table_int(tbl, "name_padding");    config.name_padding    = opt.ok ? opt.u.i : 1;
+    wordexp_t exp;
+    if (wordexp(path, &exp, 0) != 0 || exp.we_wordc == 0) {
+        // Expansion failed
+        wordfree(&exp);
+        return NULL;
+    }
 
-    opt = toml_table_string(tbl, "empty_desktop_string"); config.empty_desktop_string = opt.ok ? opt.u.s : "";
-    opt = toml_table_string(tbl, "separator_string");     config.separator_string     = opt.ok ? opt.u.s : "·";
+    char* expanded_path = STRDUP(exp.we_wordv[0]); // STRDUP is in `toml-c`
 
-    opt = toml_table_string(tbl, "active_window_left_click");          config.active_window_left_click          = opt.ok ? opt.u.s : "minimize";
-    opt = toml_table_string(tbl, "active_window_right_click");         config.active_window_right_click         = opt.ok ? opt.u.s : "close";
-    opt = toml_table_string(tbl, "active_window_middle_click");        config.active_window_middle_click        = opt.ok ? opt.u.s : "none";
-    opt = toml_table_string(tbl, "active_window_left_double_click");   config.active_window_left_double_click   = opt.ok ? opt.u.s : "none";
-    opt = toml_table_string(tbl, "active_window_right_double_click");  config.active_window_right_double_click  = opt.ok ? opt.u.s : "none";
-    opt = toml_table_string(tbl, "active_window_middle_double_click"); config.active_window_middle_double_click = opt.ok ? opt.u.s : "none";
-    opt = toml_table_string(tbl, "active_window_scroll_up");           config.active_window_scroll_up           = opt.ok ? opt.u.s : "none";
-    opt = toml_table_string(tbl, "active_window_scroll_down");         config.active_window_scroll_down         = opt.ok ? opt.u.s : "none";
+    wordfree(&exp);
+    return expanded_path;
+}
 
-    opt = toml_table_string(tbl, "inactive_window_left_click");          config.inactive_window_left_click          = opt.ok ? opt.u.s : "raise";
-    opt = toml_table_string(tbl, "inactive_window_right_click");         config.inactive_window_right_click         = opt.ok ? opt.u.s : "close";
-    opt = toml_table_string(tbl, "inactive_window_middle_click");        config.inactive_window_middle_click        = opt.ok ? opt.u.s : "none";
-    opt = toml_table_string(tbl, "inactive_window_left_double_click");   config.inactive_window_left_double_click   = opt.ok ? opt.u.s : "none";
-    opt = toml_table_string(tbl, "inactive_window_right_double_click");  config.inactive_window_right_double_click  = opt.ok ? opt.u.s : "none";
-    opt = toml_table_string(tbl, "inactive_window_middle_double_click"); config.inactive_window_middle_double_click = opt.ok ? opt.u.s : "none";
-    opt = toml_table_string(tbl, "inactive_window_scroll_up");           config.inactive_window_scroll_up           = opt.ok ? opt.u.s : "none";
-    opt = toml_table_string(tbl, "inactive_window_scroll_down");         config.inactive_window_scroll_down         = opt.ok ? opt.u.s : "none";
+toml_table_t* parse_config() {
+    // env-CONFIGPATH from  Polybar's config.ini
+    char* env_configpath = getenv("CONFIGPATH");
+    char default_configpath[MAX_STR_LEN];
 
-    opt = toml_table_string(tbl, "active_window_fg_color"); config.active_window_fg_color = opt.ok ? opt.u.s : "none";
-    opt = toml_table_string(tbl, "active_window_bg_color"); config.active_window_bg_color = opt.ok ? opt.u.s : "none";
-    opt = toml_table_string(tbl, "active_window_ul_color"); config.active_window_ul_color = opt.ok ? opt.u.s : "none";
+    char* xdg = getenv("XDG_CONFIG_HOME");
 
-    opt = toml_table_string(tbl, "inactive_window_fg_color"); config.inactive_window_fg_color = opt.ok ? opt.u.s : "#808080";
-    opt = toml_table_string(tbl, "inactive_window_bg_color"); config.inactive_window_bg_color = opt.ok ? opt.u.s : "none";
-    opt = toml_table_string(tbl, "inactive_window_ul_color"); config.inactive_window_ul_color = opt.ok ? opt.u.s : "none";
+    if (xdg && strlen(xdg) > 0) {
+        char* suffix = "polybar/windowlist.toml";
 
-    opt = toml_table_string(tbl, "separator_fg_color"); config.separator_fg_color = opt.ok ? opt.u.s : "#808080";
-    opt = toml_table_string(tbl, "separator_bg_color"); config.separator_bg_color = opt.ok ? opt.u.s : "none";
-    opt = toml_table_string(tbl, "separator_ul_color"); config.separator_ul_color = opt.ok ? opt.u.s : "none";
+        // Join correctly with trailing slash vs. no trailing slash
+        if (xdg[strlen(xdg) - 1] == '/') {
+            snprintf(default_configpath, MAX_STR_LEN, "%s%s", xdg, suffix);
+        } else {
+            snprintf(default_configpath, MAX_STR_LEN, "%s/%s", xdg, suffix);
+        }
+    } else {
+        snprintf(default_configpath, MAX_STR_LEN, "%s", "~/.config/polybar/windowlist.toml");
+    }
 
-    opt = toml_table_string(tbl, "empty_desktop_fg_color"); config.empty_desktop_fg_color = opt.ok ? opt.u.s : "none";
-    opt = toml_table_string(tbl, "empty_desktop_bg_color"); config.empty_desktop_bg_color = opt.ok ? opt.u.s : "none";
-    opt = toml_table_string(tbl, "empty_desktop_ul_color"); config.empty_desktop_ul_color = opt.ok ? opt.u.s : "none";
+    char* tmp = env_configpath ? env_configpath : default_configpath;
+    char* configpath = expand_path(tmp);
 
-    opt = toml_table_string(tbl, "overflow_fg_color"); config.overflow_fg_color = opt.ok ? opt.u.s : "none";
-    opt = toml_table_string(tbl, "overflow_bg_color"); config.overflow_bg_color = opt.ok ? opt.u.s : "none";
-    opt = toml_table_string(tbl, "overflow_ul_color"); config.overflow_ul_color = opt.ok ? opt.u.s : "none";
+    // Show message on the bar if env-CONFIGPATH points to a file that doesn't exist
+    if (env_configpath && access(configpath, F_OK) != 0) {
+        printf("Not found: %s\n", configpath);
+        fflush(stdout);
+        free(configpath);
+        exit(EXIT_FAILURE);
+    }
 
-    opt = toml_table_int(tbl, "active_window_font");   config.active_window_font   = opt.ok ? opt.u.i : 0;
-    opt = toml_table_int(tbl, "inactive_window_font"); config.inactive_window_font = opt.ok ? opt.u.i : 0;
-    opt = toml_table_int(tbl, "separator_font");       config.separator_font       = opt.ok ? opt.u.i : 0;
-    opt = toml_table_int(tbl, "empty_desktop_font");   config.empty_desktop_font   = opt.ok ? opt.u.i : 0;
-    opt = toml_table_int(tbl, "overflow_font");        config.overflow_font        = opt.ok ? opt.u.i : 0;
+    toml_table_t* tbl = NULL;
 
-    // It's fine if these are NULL
-    config.ignored_classes  = toml_table_array(tbl, "ignored_classes");
-    config.window_nicknames = toml_table_table(tbl, "window_nicknames");
+    if (configpath && access(configpath, F_OK) == 0) {
+        char errbuf[MAX_STR_LEN];
+        FILE* fp = fopen(configpath, "r");
+        tbl = toml_parse_file(fp, errbuf, sizeof(errbuf));
+        fclose(fp);
+    }
+
+    free(configpath);
+
+    config.sort_by = toml_string_or_default(tbl, "sort_by", "none");
+    config.max_windows = toml_int_or_default(tbl, "max_windows", 13);
+    config.all_desktops = toml_bool_or_default(tbl, "all_desktops", false);
+
+    config.name = toml_string_or_default(tbl, "name", "class");
+    config.name_case = toml_string_or_default(tbl, "name_case", "lowercase");
+    config.name_max_length = toml_int_or_default(tbl, "name_max_length", 30);
+    config.name_padding = toml_int_or_default(tbl, "name_padding", 1);
+
+    config.empty_desktop_string = toml_string_or_default(tbl, "empty_desktop_string", "");
+    config.separator_string = toml_string_or_default(tbl, "separator_string", "·");
+
+    config.active_window_left_click = toml_string_or_default(tbl, "active_window_left_click", "windowlist-minimize");
+    config.active_window_right_click = toml_string_or_default(tbl, "active_window_right_click", "windowlist-close");
+    config.active_window_middle_click = toml_string_or_default(tbl, "active_window_middle_click", "none");
+    config.active_window_left_double_click = toml_string_or_default(tbl, "active_window_left_double_click", "none");
+    config.active_window_right_double_click = toml_string_or_default(tbl, "active_window_right_double_click", "none");
+    config.active_window_middle_double_click = toml_string_or_default(tbl, "active_window_middle_double_click", "none");
+    config.active_window_scroll_up = toml_string_or_default(tbl, "active_window_scroll_up", "none");
+    config.active_window_scroll_down = toml_string_or_default(tbl, "active_window_scroll_down", "none");
+
+    config.inactive_window_left_click = toml_string_or_default(tbl, "inactive_window_left_click", "windowlist-raise");
+    config.inactive_window_right_click = toml_string_or_default(tbl, "inactive_window_right_click", "windowlist-close");
+    config.inactive_window_middle_click = toml_string_or_default(tbl, "inactive_window_middle_click", "none");
+    config.inactive_window_left_double_click = toml_string_or_default(tbl, "inactive_window_left_double_click", "none");
+    config.inactive_window_right_double_click = toml_string_or_default(tbl, "inactive_window_right_double_click", "none");
+    config.inactive_window_middle_double_click = toml_string_or_default(tbl, "inactive_window_middle_double_click", "none");
+    config.inactive_window_scroll_up = toml_string_or_default(tbl, "inactive_window_scroll_up", "none");
+    config.inactive_window_scroll_down = toml_string_or_default(tbl, "inactive_window_scroll_down", "none");
+
+    config.active_window_fg_color = toml_string_or_default(tbl, "active_window_fg_color", "none");
+    config.active_window_bg_color = toml_string_or_default(tbl, "active_window_bg_color", "none");
+    config.active_window_ul_color = toml_string_or_default(tbl, "active_window_ul_color", "none");
+
+    config.inactive_window_fg_color = toml_string_or_default(tbl, "inactive_window_fg_color", "#808080");
+    config.inactive_window_bg_color = toml_string_or_default(tbl, "inactive_window_bg_color", "none");
+    config.inactive_window_ul_color = toml_string_or_default(tbl, "inactive_window_ul_color", "none");
+
+    config.separator_fg_color = toml_string_or_default(tbl, "separator_fg_color", "#808080");
+    config.separator_bg_color = toml_string_or_default(tbl, "separator_bg_color", "none");
+    config.separator_ul_color = toml_string_or_default(tbl, "separator_ul_color", "none");
+
+    config.empty_desktop_fg_color = toml_string_or_default(tbl, "empty_desktop_fg_color", "none");
+    config.empty_desktop_bg_color = toml_string_or_default(tbl, "empty_desktop_bg_color", "none");
+    config.empty_desktop_ul_color = toml_string_or_default(tbl, "empty_desktop_ul_color", "none");
+
+    config.overflow_fg_color = toml_string_or_default(tbl, "overflow_fg_color", "none");
+    config.overflow_bg_color = toml_string_or_default(tbl, "overflow_bg_color", "none");
+    config.overflow_ul_color = toml_string_or_default(tbl, "overflow_ul_color", "none");
+
+    config.active_window_font = toml_int_or_default(tbl, "active_window_font", 0);
+    config.inactive_window_font = toml_int_or_default(tbl, "inactive_window_font", 0);
+    config.separator_font = toml_int_or_default(tbl, "separator_font", 0);
+    config.empty_desktop_font = toml_int_or_default(tbl, "empty_desktop_font", 0);
+    config.overflow_font = toml_int_or_default(tbl, "overflow_font", 0);
+
+    config.ignored_classes  = tbl ? toml_table_array(tbl, "ignored_classes") : NULL;
+    config.window_nicknames = tbl ? toml_table_table(tbl, "window_nicknames") : NULL;
 
     return tbl;
 }
@@ -326,13 +395,12 @@ void print_polybar_str(char* label, char* fg_color, char* bg_color, char* ul_col
     }
 }
 
-void set_action_str(char* str, char* option, Window wid) {
-    if (is_unused(option)) {
+void set_action_str(char* str, char* script_option, Window wid) {
+    if (is_unused(script_option)) {
         strcpy(str, "none");
         return;
     }
-
-    snprintf(str, MAX_STR_LEN, "%s/click-actions/%s 0x%lx", COMPILE_DIR, option, wid);
+    snprintf(str, MAX_STR_LEN, "%s 0x%lx", script_option, wid);
 }
 
 void output(struct wprops* wlist, int wlist_len, Window active_window, long current_desktop_id) {
@@ -492,7 +560,7 @@ int main(int argc, char* argv[]) {
     Display* d = XOpenDisplay(NULL);
     Window root = DefaultRootWindow(d);
 
-    toml_table_t* tbl = parse_config("config.toml");
+    toml_table_t* tbl = parse_config();
 
     int wlist_len;
     struct wprops* wlist = generate_window_list(d, &wlist_len);
